@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Leaf, MapPin, Scale, Sprout, Tractor, CheckCircle, Mic } from 'lucide-react';
+import { Leaf, MapPin, Scale, Sprout, Tractor, CheckCircle, Mic, User } from 'lucide-react';
 import { useFarm } from '../contexts/FarmContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { useSpeech } from '../contexts/SpeechContext';
@@ -13,10 +13,11 @@ import { reverseGeocode } from '../lib/gemini';
 import Footer from '../components/layout/Footer';
 
 const steps = [
-  { id: 1, name: 'farmSetupStep1' },
-  { id: 2, name: 'farmSetupStep2' },
-  { id: 3, name: 'farmSetupStep3' },
-  { id: 4, name: 'farmSetupStep4' },
+  { id: 1, name: 'farmSetupStepPersonal' },
+  { id: 2, name: 'farmSetupStep1' },
+  { id: 3, name: 'farmSetupStep2' },
+  { id: 4, name: 'farmSetupStep3' },
+  { id: 5, name: 'farmSetupStep4' },
 ];
 
 const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -29,6 +30,7 @@ const FarmSetup: React.FC = () => {
   
   const [currentStep, setCurrentStep] = useState(1);
   const [details, setDetails] = useState({
+    farmerName: '',
     location: '',
     landSize: '',
     soilType: 'Loamy',
@@ -201,7 +203,7 @@ const FarmSetup: React.FC = () => {
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep >= step.id ? 'bg-emerald-600 text-white' : 'bg-stone-200 text-stone-500'}`}>
                     {currentStep > step.id ? <CheckCircle size={20}/> : step.id}
                   </div>
-                  <span className="text-xs font-bold mt-2">{t(step.name as any)}</span>
+                  <span className="text-xs font-bold mt-2 text-center w-20">{t(step.name as any)}</span>
                 </div>
                 {index < steps.length - 1 && <div className={`flex-1 h-1 mx-2 ${currentStep > index + 1 ? 'bg-emerald-600' : 'bg-stone-200'}`}></div>}
               </React.Fragment>
@@ -219,6 +221,13 @@ const FarmSetup: React.FC = () => {
               >
                 {currentStep === 1 && (
                   <div className="space-y-6 text-center">
+                    <h2 className="text-2xl font-bold">{t('farmSetupPersonalTitle')}</h2>
+                    <Input name="farmerName" label={t('farmSetupFarmerNameLabel')} placeholder={t('farmSetupFarmerNamePlaceholder')} value={details.farmerName} onChange={handleChange} icon={<User />} onFocus={() => speak('speakFarmSetupName')} required />
+                  </div>
+                )}
+                
+                {currentStep === 2 && (
+                  <div className="space-y-6 text-center">
                     <h2 className="text-2xl font-bold">{t('farmSetupLocationTitle')}</h2>
                     <p className="text-stone-500">{t('farmSetupLocationDesc')}</p>
                     <Input name="location" label={t('farmSetupLocationLabel')} placeholder={t('farmSetupLocationPlaceholder')} value={details.location} onChange={handleChange} icon={<MapPin />} onFocus={() => speak('speakFarmSetupLocation')} required />
@@ -227,7 +236,7 @@ const FarmSetup: React.FC = () => {
                   </div>
                 )}
 
-                {currentStep === 2 && (
+                {currentStep === 3 && (
                   <div className="space-y-6 text-center">
                     <h2 className="text-2xl font-bold">{t('farmSetupBasicsTitle')}</h2>
                     <p className="text-stone-500">{t('farmSetupBasicsDesc')}</p>
@@ -239,7 +248,7 @@ const FarmSetup: React.FC = () => {
                   </div>
                 )}
                 
-                 {currentStep === 3 && (
+                 {currentStep === 4 && (
                   <div className="space-y-6 text-center">
                     <h2 className="text-2xl font-bold">{t('farmSetupInfraTitle')}</h2>
                     <p className="text-stone-500">{t('farmSetupInfraDesc')}</p>
@@ -252,18 +261,19 @@ const FarmSetup: React.FC = () => {
                   </div>
                 )}
 
-                {currentStep === 4 && (
+                {currentStep === 5 && (
                   <div className="space-y-6 text-center">
                     <h2 className="text-2xl font-bold">{t('farmSetupConfirmTitle')}</h2>
                     <p className="text-stone-500">{t('farmSetupConfirmDesc')}</p>
                     <div className="text-left bg-stone-50 p-6 rounded-2xl border border-stone-200 grid grid-cols-2 gap-4">
+                      <div><strong>{t('farmSetupConfirmLabelName')}:</strong> {details.farmerName}</div>
                       <div><strong>{t('farmSetupConfirmLabelLocation')}:</strong> {details.location}</div>
                       <div><strong>{t('farmSetupConfirmLabelLand')}:</strong> {details.landSize} Acres</div>
                       <div><strong>{t('farmSetupConfirmLabelSoil')}:</strong> {details.soilType}</div>
                       <div><strong>{t('farmSetupConfirmLabelCrops')}:</strong> {details.crops}</div>
                       <div><strong>{t('farmSetupConfirmLabelSeason')}:</strong> {details.season}</div>
                       <div><strong>{t('farmSetupConfirmLabelWater')}:</strong> {details.waterSource}</div>
-                      <div><strong>{t('farmSetupConfirmLabelIrrigation')}:</strong> {details.irrigationMethod}</div>
+                       <div><strong>{t('farmSetupConfirmLabelIrrigation')}:</strong> {details.irrigationMethod}</div>
                        <div><strong>{t('farmSetupConfirmLabelMachinery')}:</strong> {details.machinery}</div>
                     </div>
                   </div>

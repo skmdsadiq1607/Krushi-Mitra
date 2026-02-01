@@ -23,24 +23,21 @@ const MarketIntelligence: React.FC = () => {
     const [error, setError] = useState<string|null>(null);
     const [analysis, setAnalysis] = useState<MarketAnalysis|null>(null);
 
-    const { crop, location, storageCostPerWeek, spoilageRatePerWeek, harvestedQuantity } = useMemo(() => {
-        if (!farmData) return { crop: '', location: '', storageCostPerWeek: 0, spoilageRatePerWeek: 0, harvestedQuantity: 0 };
-        
-        const seasonLengthWeeks = 16; // Assumption for a typical season
-        const storageCostPerWeek = (farmData.costs?.storage || 0) / (seasonLengthWeeks > 0 ? seasonLengthWeeks : 1);
-        const spoilageRatePerWeek = (farmData.storage?.spoilageRate || 0);
-        const harvestedQuantity = farmData.storage?.harvestedQuantity || 0;
+    const { crop, location, totalStorageCost, season, spoilageRatePerWeek, harvestedQuantity } = useMemo(() => {
+        if (!farmData) return { crop: '', location: '', totalStorageCost: 0, season: '', spoilageRatePerWeek: 0, harvestedQuantity: 0 };
         
         return { 
             crop: farmData.farmDetails?.crops?.[0] || 'your crop',
             location: farmData.farmDetails?.location || '',
-            storageCostPerWeek, 
-            spoilageRatePerWeek, 
-            harvestedQuantity 
+            totalStorageCost: farmData.costs?.storage || 0,
+            season: farmData.farmDetails?.season || 'Kharif',
+            spoilageRatePerWeek: (farmData.storage?.spoilageRate || 0),
+            harvestedQuantity: farmData.storage?.harvestedQuantity || 0 
         };
     }, [farmData]);
 
     const handleAnalyze = async () => {
+        setError(null);
         if (!crop || !location || crop === 'your crop') {
              setError("Please set your primary crop in the farm setup.");
              return;
@@ -50,16 +47,20 @@ const MarketIntelligence: React.FC = () => {
             setError("Please enter a valid local price.");
             return;
         }
+        if (harvestedQuantity <= 0) {
+            setError("Please enter your harvested quantity in the Storage Manager first.");
+            return;
+        }
 
         setIsLoading(true);
-        setError(null);
         try {
             const result = await getMarketAnalysis(
                 crop, 
                 location, 
                 language,
                 priceNum,
-                storageCostPerWeek,
+                totalStorageCost,
+                season,
                 spoilageRatePerWeek,
                 harvestedQuantity
             );

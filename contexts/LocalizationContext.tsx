@@ -7,7 +7,7 @@ type Language = 'en' | 'te' | 'hi' | 'ur';
 interface LocalizationContextType {
   language: Language;
   setLanguage: (language: Language) => void;
-  t: (key: keyof Translation['ui']) => string;
+  t: (key: keyof Translation['ui'], dynamicValues?: Record<string, string | number>) => string;
 }
 
 const LocalizationContext = createContext<LocalizationContextType | undefined>(undefined);
@@ -27,9 +27,18 @@ export const LocalizationProvider = ({ children }: PropsWithChildren) => {
     localStorage.setItem('krushi_mitra_language', lang);
   }, []);
 
-  const t = (key: keyof Translation['ui']) => {
+  const t = (key: keyof Translation['ui'], dynamicValues?: Record<string, string | number>) => {
     const translationSet = translations[language] || translations.en;
-    return translationSet.ui[key] || translations.en.ui[key] || String(key);
+    let text = translationSet.ui[key] || translations.en.ui[key] || String(key);
+
+    if (dynamicValues) {
+        Object.keys(dynamicValues).forEach(placeholder => {
+            const regex = new RegExp(`{{${placeholder}}}`, 'g');
+            text = text.replace(regex, String(dynamicValues[placeholder]));
+        });
+    }
+
+    return text;
   };
 
   return (

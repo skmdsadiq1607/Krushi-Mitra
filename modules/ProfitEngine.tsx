@@ -1,38 +1,81 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { useFarm } from '../contexts/FarmContext';
 import { useLocalization } from '../contexts/LocalizationContext';
 import { useSpeech } from '../contexts/SpeechContext';
 import { useAutoSpeak } from '../hooks/useAutoSpeak';
+import { getMarketPriceSuggestion } from '../lib/gemini';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { TrendingUp, Scale, CircleDollarSign } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { TrendingUp, Scale, CircleDollarSign, Sparkles } from 'lucide-react';
 
 const ProfitEngine: React.FC = () => {
     const { farmData } = useFarm();
-    const { t } = useLocalization();
+    const { t, language } = useLocalization();
     const { speak } = useSpeech();
     useAutoSpeak('speakProfitEngineIntro');
 
     const [yieldPerAcre, setYieldPerAcre] = useState('');
     const [pricePerQuintal, setPricePerQuintal] = useState('');
+    const [priceSuggestion, setPriceSuggestion] = useState<{ price: number; justification: string } | null>(null);
+    const [isSuggestingPrice, setIsSuggestingPrice] = useState(false);
+    const [priceSuggestionError, setPriceSuggestionError] = useState<string | null>(null);
 
-    const { totalInvestment, landSize } = useMemo(() => {
-        if (!farmData) return { totalInvestment: 0, landSize: 1 };
+
+    const { totalInvestment, landSize, costBreakdown } = useMemo(() => {
+        if (!farmData) return { totalInvestment: 0, landSize: 1, costBreakdown: [] };
+        
         const { costs, farmDetails } = farmData;
-        const total = (costs.seeds?.cost || 0) +
-                      (costs.fertilizers?.reduce((s, i) => s + i.cost, 0) || 0) +
-                      (costs.pesticides?.reduce((s, i) => s + i.cost, 0) || 0) +
-                      (costs.labor?.wages || 0) +
-                      (costs.machinery?.fuel || 0) +
-                      (costs.electricity || 0) +
-                      (costs.irrigation || 0) +
-                      (costs.transport || 0) +
-                      (costs.storage || 0);
-        return { totalInvestment: total, landSize: farmDetails.landSize > 0 ? farmDetails.landSize : 1 };
-    }, [farmData]);
+        const seedsCost = costs.seeds?.cost || 0;
+        const fertilizersCost = costs.fertilizers?.reduce((s, i) => s + i.cost, 0) || 0;
+        const pesticidesCost = costs.pesticides?.reduce((s, i) => s + i.cost, 0) || 0;
+        const laborCost = costs.labor?.wages || 0;
+        const machineryCost = costs.machinery?.fuel || 0;
+        const utilitiesCost = (costs.electricity || 0) + (costs.irrigation || 0) + (costs.transport || 0) + (costs.storage || 0);
+
+        const breakdown = [
+            { name: t('costCategorySeeds'), cost: seedsCost, fill: '#34d399' },
+            { name: t('costCategoryFertilizers'), cost: fertilizersCost, fill: '#fbbf24' },
+            { name: t('costCategoryPesticides'), cost: pesticidesCost, fill: '#f87171' },
+            { name: t('costCategoryLabor'), cost: laborCost, fill: '#60a5fa' },
+            { name: t('costCategoryMachinery'), cost: machineryCost, fill: '#c084fc' },
+            { name: t('costCategoryUtilities'), cost: utilitiesCost, fill: '#9ca3af' },
+        ].filter(item => item.cost > 0);
+
+        const total = breakdown.reduce((sum, item) => sum + item.cost, 0);
+        
+        return { 
+            totalInvestment: total, 
+            landSize: farmDetails.landSize > 0 ? farmDetails.landSize : 1,
+            costBreakdown: breakdown,
+        };
+    }, [farmData, t]);
+
+    const handleGetPriceSuggestion = async () => {
+        if (!farmData) return;
+        setIsSuggestingPrice(true);
+        setPriceSuggestion(null);
+        setPriceSuggestionError(null);
+        try {
+            const crop = farmData.farmDetails.crops[0];
+            const location = farmData.farmDetails.location;
+            const suggestion = await getMarketPriceSuggestion(crop, location, language);
+            setPriceSuggestion(suggestion);
+            setPricePerQuintal(suggestion.price.toString());
+        } catch (error) {
+            console.error("Failed to get price suggestion:", error);
+            if (error instanceof Error && (error.message.includes('429') || error.message.includes('RESOURCE_EXHAUSTED'))) {
+                setPriceSuggestionError("API request limit exceeded. Please try again in a moment.");
+            } else {
+                setPriceSuggestionError("Could not fetch price suggestion.");
+            }
+        } finally {
+            setIsSuggestingPrice(false);
+        }
+    };
     
     const analysis = useMemo(() => {
         const yieldNum = parseFloat(yieldPerAcre) || 0;
@@ -54,8 +97,7 @@ const ProfitEngine: React.FC = () => {
     }, [yieldPerAcre, pricePerQuintal, totalInvestment, landSize]);
 
     const chartData = [
-        { name: 'Cost', value: totalInvestment, fill: '#f59e0b' },
-        { name: 'Revenue', value: analysis?.totalRevenue || 0, fill: '#10b981' }
+        { name: t('profitEngineChartTitle'), Cost: totalInvestment, Revenue: analysis?.totalRevenue || 0 }
     ];
 
     return (
@@ -78,15 +120,27 @@ const ProfitEngine: React.FC = () => {
                                 icon={<Scale/>}
                                 onFocus={() => speak('speakProfitYield')}
                             />
-                            <Input 
-                                label={t('profitEnginePriceLabel')}
-                                placeholder={t('profitEnginePricePlaceholder')}
-                                type="number"
-                                value={pricePerQuintal}
-                                onChange={e => setPricePerQuintal(e.target.value)}
-                                icon={<CircleDollarSign/>}
-                                onFocus={() => speak('speakProfitPrice')}
-                            />
+                            <div>
+                                <Input 
+                                    label={t('profitEnginePriceLabel')}
+                                    placeholder={t('profitEnginePricePlaceholder')}
+                                    type="number"
+                                    value={pricePerQuintal}
+                                    onChange={e => setPricePerQuintal(e.target.value)}
+                                    icon={<CircleDollarSign/>}
+                                    onFocus={() => speak('speakProfitPrice')}
+                                />
+                                <Button variant="secondary" onClick={handleGetPriceSuggestion} disabled={isSuggestingPrice} className="w-full mt-3 !py-3 !text-sm">
+                                    <Sparkles size={16} className="mr-2"/>
+                                    {isSuggestingPrice ? t('profitEngineAnalyzingPrice') : t('profitEngineGetPriceSuggestion')}
+                                </Button>
+                                {priceSuggestion && (
+                                    <p className="text-xs text-stone-500 mt-2 p-2 bg-stone-100 rounded-md">{priceSuggestion.justification}</p>
+                                )}
+                                {priceSuggestionError && (
+                                    <p className="text-xs text-red-500 mt-2 p-2 bg-red-50 rounded-md">{priceSuggestionError}</p>
+                                )}
+                            </div>
                         </div>
                     </Card>
                     <Card>
@@ -99,7 +153,7 @@ const ProfitEngine: React.FC = () => {
 
                 <div className="lg:col-span-2">
                     {analysis ? (
-                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
                             <Card title={t('profitEngineAnalysis')} icon={<TrendingUp/>}>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-8">
                                     <div>
@@ -125,7 +179,22 @@ const ProfitEngine: React.FC = () => {
                                             <XAxis dataKey="name" />
                                             <YAxis width={80} tickFormatter={(value) => `₹${Number(value).toLocaleString()}`} />
                                             <Tooltip formatter={(value) => `₹${Number(value).toLocaleString()}`} />
-                                            <Bar dataKey="value" barSize={60} />
+                                            <Legend />
+                                            <Bar dataKey="Cost" fill="#f59e0b" />
+                                            <Bar dataKey="Revenue" fill="#10b981" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </Card>
+                             <Card title="Cost Breakdown">
+                                <div style={{width: '100%', height: 300}}>
+                                     <ResponsiveContainer>
+                                        <BarChart data={costBreakdown} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                             <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis type="number" tickFormatter={(value) => `₹${Number(value/1000).toFixed(0)}k`} />
+                                            <YAxis type="category" dataKey="name" width={100} />
+                                            <Tooltip formatter={(value) => `₹${Number(value).toLocaleString()}`} />
+                                            <Bar dataKey="cost" name="Cost" barSize={30} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>

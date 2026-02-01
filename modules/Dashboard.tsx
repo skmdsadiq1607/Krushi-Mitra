@@ -86,10 +86,7 @@ const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-12"
         >
-            <header>
-                <h1 className="text-4xl font-black text-stone-900 tracking-tighter">{t('dashboardTitle')}</h1>
-                <p className="text-stone-500 font-medium mt-1">{t('dashboardSubtitle')}</p>
-            </header>
+            <p className="text-stone-500 font-medium -mt-4">{t('dashboardSubtitle')}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <Card className="bg-gradient-to-br from-emerald-50 to-green-50">

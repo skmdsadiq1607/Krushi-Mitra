@@ -37,8 +37,6 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
     const { farmData } = useFarm();
     const { language } = useLocalization();
 
-    // Use refs to hold the latest data without causing re-renders of the callback itself.
-    // This is key to preventing the fetch-on-every-update bug.
     const farmDataRef = useRef(farmData);
     useEffect(() => {
         farmDataRef.current = farmData;
@@ -49,7 +47,6 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
         languageRef.current = language;
     }, [language]);
 
-    // This callback is now stable and won't be recreated on every farmData change.
     const fetchData = useCallback(async () => {
         const currentFarmData = farmDataRef.current;
         const currentLanguage = languageRef.current;
@@ -84,22 +81,29 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
                  setState(s => ({ ...s, isLoading: false, error: "An error occurred while fetching AI insights." }));
             }
         }
-    }, []); // Empty dependency array makes this function stable.
+    }, []);
 
-    // This effect runs only when farmData is first loaded, triggering the initial fetch.
+    // Effect for the initial data load. Runs only once when farmData becomes available.
+    const isInitialLoadDone = useRef(false);
     useEffect(() => {
-        if (farmData) {
+        if (farmData && !isInitialLoadDone.current) {
             fetchData();
+            isInitialLoadDone.current = true;
         }
     }, [farmData, fetchData]);
 
-    // This effect runs ONLY when the language changes.
+    // Effect for language changes. Skips the initial mount to avoid double-fetching.
+    const isMounted = useRef(false);
     useEffect(() => {
-        // We check farmData to ensure we don't fetch on language change before the app is ready.
-        if (farmData) {
-            fetchData();
+        if (isMounted.current) {
+            if (farmDataRef.current) {
+                fetchData();
+            }
+        } else {
+            isMounted.current = true;
         }
-    }, [language, fetchData]); // We can add farmData here because the above effect handles the initial load
+    }, [language, fetchData]);
+
 
     const refresh = () => {
         fetchData();

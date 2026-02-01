@@ -1,8 +1,11 @@
-
 import React from 'react';
-import { motion } from 'framer-motion';
+// FIX: Import HTMLMotionProps to resolve type conflicts with standard React HTML attributes.
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+// FIX: Extend HTMLMotionProps<'button'> instead of React.ButtonHTMLAttributes<HTMLButtonElement>.
+// This ensures that the props passed to motion.button have the correct types for gesture handlers
+// like onDrag, avoiding conflicts.
+interface ButtonProps extends HTMLMotionProps<'button'> {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary';
 }

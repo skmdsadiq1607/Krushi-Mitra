@@ -43,6 +43,8 @@ const StrategicAdvisor: React.FC = () => {
         return <div className="text-center font-bold text-red-500">Could not load strategic advice.</div>;
     }
 
+    const { currentCrop } = advice.cropSwitch;
+
     return (
         <div className="max-w-7xl mx-auto space-y-8">
             <header>
@@ -86,10 +88,9 @@ const StrategicAdvisor: React.FC = () => {
                     <div className="bg-stone-100 p-6 rounded-2xl border-2 border-stone-200">
                         <h3 className="font-black text-2xl text-stone-800 mb-4">{t('advisorCurrentPlan')} ({farmData?.farmDetails.crops[0]})</h3>
                         <div className="space-y-4">
-                            <div className="flex justify-between items-center"><span className="font-bold text-stone-600">{t('advisorEstProfit')}</span> <span className="font-bold text-lg">₹{advice.cropSwitch.currentCropProfit.toLocaleString()}</span></div>
-                            {/* Assuming current crop details are moderate as a baseline */}
-                            <div className="flex justify-between items-center"><span className="font-bold text-stone-600">{t('advisorWaterReq')}</span> <InfoPill text="Moderate" level="Moderate" /></div>
-                            <div className="flex justify-between items-center"><span className="font-bold text-stone-600">{t('advisorRiskLevel')}</span> <InfoPill text="Moderate" level="Moderate" /></div>
+                            <div className="flex justify-between items-center"><span className="font-bold text-stone-600">{t('advisorEstProfit')}</span> <span className="font-bold text-lg">₹{currentCrop.profit.toLocaleString()}</span></div>
+                            <div className="flex justify-between items-center"><span className="font-bold text-stone-600">{t('advisorWaterReq')}</span> <InfoPill text={currentCrop.waterRequirement} level={currentCrop.waterRequirement} /></div>
+                            <div className="flex justify-between items-center"><span className="font-bold text-stone-600">{t('advisorRiskLevel')}</span> <InfoPill text={currentCrop.riskLevel} level={currentCrop.riskLevel} /></div>
                         </div>
                     </div>
 

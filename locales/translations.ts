@@ -8,17 +8,32 @@ export interface Translation {
     back: string;
     save: string;
     confirm: string;
+    learnMore: string;
+    // Landing Page
+    landingSubtitle: string;
+    landingVisionTitle: string;
+    landingVisionText: string;
+    landingMissionTitle: string;
+    landingMissionText: string;
+    landingHowItWorksTitle: string;
+    landingHowItWorksSubtitle: string;
+    landingFeature1: string;
+    landingFeature2: string;
+    landingFeature3: string;
+    landingFeature4: string;
+    landingStartButton: string;
     // Sidebar
     navDashboard: string;
     navWeatherHub: string;
     navWaterManage: string;
     navCostManager: string;
-    navDiseaseScanner: string;
+    navCropHealthScanner: string;
     navStorageManager: string;
     navProfitEngine: string;
     navMarketIntel: string;
     navNotebook: string;
     navStrategicAdvisor: string;
+    navGovtSchemes: string;
     // Header
     headerStatus: string;
     headerStatusText: string;
@@ -26,10 +41,14 @@ export interface Translation {
     farmSetupTitle: string;
     farmSetupSubtitle: string;
     farmSetupLanguageSelectPrompt: string;
+    farmSetupStepPersonal: string;
     farmSetupStep1: string;
     farmSetupStep2: string;
     farmSetupStep3: string;
     farmSetupStep4: string;
+    farmSetupPersonalTitle: string;
+    farmSetupFarmerNameLabel: string;
+    farmSetupFarmerNamePlaceholder: string;
     farmSetupLocationTitle: string;
     farmSetupLocationDesc: string;
     farmSetupLocationLabel: string;
@@ -51,6 +70,7 @@ export interface Translation {
     farmSetupMachineryPlaceholder: string;
     farmSetupConfirmTitle: string;
     farmSetupConfirmDesc: string;
+    farmSetupConfirmLabelName: string;
     farmSetupConfirmLabelLocation: string;
     farmSetupConfirmLabelLand: string;
     farmSetupConfirmLabelSoil: string;
@@ -61,6 +81,7 @@ export interface Translation {
     farmSetupConfirmLabelMachinery: string;
     farmSetupCompleteButton: string;
     // Dashboard
+    dashboardWelcome: string;
     dashboardTitle: string;
     dashboardSubtitle: string;
     kpiTotalInvestment: string;
@@ -104,20 +125,26 @@ export interface Translation {
     costTotalInvestment: string;
     costPerAcre: string;
     costUpdateButton: string;
-    // Disease Scanner
-    diseaseScannerTitle: string;
-    diseaseScannerSubtitle: string;
-    diseaseScannerUploadLabel: string;
-    diseaseScannerUploadButton: string;
-    diseaseScannerAnalyzing: string;
-    diseaseScannerError: string;
-    diseaseScannerResultTitle: string;
-    diseaseScannerResultConfidence: string;
-    diseaseScannerResultSeverity: string;
-    diseaseScannerResultExplanation: string;
-    diseaseScannerResultTreatment: string;
-    diseaseScannerResultCost: string;
-    diseaseScannerResultPrevention: string;
+    // Crop Health Scanner
+    cropHealthScannerTitle: string;
+    cropHealthScannerSubtitle: string;
+    cropHealthScannerUploadLabel: string;
+    cropHealthScannerUploadButton: string;
+    cropHealthScannerAnalyzing: string;
+    cropHealthScannerError: string;
+    cropHealthScannerResultTitle: string;
+    cropHealthScannerResultConfidence: string;
+    cropHealthScannerResultSeverity: string;
+    cropHealthScannerResultExplanation: string;
+    cropHealthScannerResultTreatment: string;
+    cropHealthScannerResultCost: string;
+    cropHealthScannerResultPrevention: string;
+    cropHealthScannerSelectType: string;
+    cropHealthScannerTypeDisease: string;
+    cropHealthScannerTypePest: string;
+    cropHealthScannerTypeWeed: string;
+    cropHealthScannerResultThreat: string;
+    cropHealthScannerResultControl: string;
     // Storage Manager
     storageManagerTitle: string;
     storageManagerSubtitle: string;
@@ -148,6 +175,8 @@ export interface Translation {
     profitEngineNetProfit: string;
     profitEngineBreakEven: string;
     profitEngineChartTitle: string;
+    profitEngineGetPriceSuggestion: string;
+    profitEngineAnalyzingPrice: string;
     // Market Intel
     marketIntelTitle: string;
     marketIntelSubtitle: string;
@@ -204,11 +233,19 @@ export interface Translation {
     waterLogButton: string;
     waterHistory: string;
     waterAITip: string;
+    // Government Schemes
+    govtSchemesTitle: string;
+    govtSchemesSubtitle: string;
+    centralSchemesTitle: string;
+    stateSchemesTitle: string;
+    mspTitle: string;
+    farmerRightsTitle: string;
     // General UI
     micPermissionDenied: string;
     gpsPermissionDenied: string;
     // --- GRANULAR VOICE KEYS ---
     // Farm Setup
+    speakFarmSetupName: string;
     speakSoilType: string;
     speakCrops: string;
     speakSeason: string;
@@ -236,7 +273,7 @@ export interface Translation {
     speakTransportCost: string;
     speakStorageCost: string;
     speakUpdateCostsBtn: string;
-    // Disease Scanner
+    // Crop Health Scanner
     speakUploadArea: string;
     speakAnalyzeCropBtn: string;
     // Storage Manager
@@ -265,7 +302,7 @@ export interface Translation {
     speakWeatherIntro: string;
     speakWaterIntro: string;
     speakCostManagerIntro: string;
-    speakDiseaseScannerIntro: string;
+    speakCropHealthScannerIntro: string;
     speakStorageManagerIntro: string;
     speakProfitEngineIntro: string;
     speakMarketIntelIntro: string;
@@ -284,25 +321,43 @@ export const translations: { [key: string]: Translation } = {
       back: 'Back',
       save: 'Save Costs',
       confirm: 'Confirm & Finish',
+      learnMore: 'Learn More',
+      landingSubtitle: 'Your personal AI-powered companion for smarter, more profitable, and sustainable farming.',
+      landingVisionTitle: 'Our Vision',
+      landingVisionText: 'To bring the power of data and AI to every farmer in India, making agriculture more profitable and sustainable for generations to come.',
+      landingMissionTitle: 'Our Mission',
+      landingMissionText: 'To provide a comprehensive digital tool that simplifies farm management, offers real-time strategic advice, and connects farmers to vital information in their own language.',
+      landingHowItWorksTitle: 'How Your Data Powers Krushi Mitra',
+      landingHowItWorksSubtitle: "Krushi Mitra's accuracy and personalized advice depend entirely on the information you provide. By setting up your farm profile, you unlock precise, AI-driven insights for:",
+      landingFeature1: 'Accurate Cost & Profit Calculations',
+      landingFeature2: 'Custom Strategic Risk Advice',
+      landingFeature3: 'Tailored Disease & Pest Control',
+      landingFeature4: 'Hyper-Local Weather & Market Insights',
+      landingStartButton: "Let's Get Started",
       navDashboard: 'Command Center',
       navWeatherHub: 'Weather Hub',
       navWaterManage: 'Water Management',
       navCostManager: 'Cost Manager',
-      navDiseaseScanner: 'Disease Scanner',
+      navCropHealthScanner: 'Crop Health Scanner',
       navStorageManager: 'Storage Manager',
       navProfitEngine: 'Profit Engine',
       navMarketIntel: 'Market Intel',
       navNotebook: 'Notebook',
       navStrategicAdvisor: 'Strategic Advisor',
+      navGovtSchemes: 'Govt. Schemes & MSP',
       headerStatus: 'Status',
       headerStatusText: 'Operational',
       farmSetupTitle: 'Welcome to Krushi Mitra',
       farmSetupSubtitle: "Let's set up your farm profile for precise, AI-powered advice.",
       farmSetupLanguageSelectPrompt: 'Please select or speak your language',
+      farmSetupStepPersonal: 'Your Name',
       farmSetupStep1: 'Location',
       farmSetupStep2: 'Farm Basics',
       farmSetupStep3: 'Infrastructure',
       farmSetupStep4: 'Confirmation',
+      farmSetupPersonalTitle: "What should we call you?",
+      farmSetupFarmerNameLabel: 'Your Full Name',
+      farmSetupFarmerNamePlaceholder: 'e.g., Ramesh Kumar',
       farmSetupLocationTitle: 'Where is your farm located?',
       farmSetupLocationDesc: 'Precise location helps in providing accurate weather and market data.',
       farmSetupLocationLabel: 'Your Location (District, State)',
@@ -324,6 +379,7 @@ export const translations: { [key: string]: Translation } = {
       farmSetupMachineryPlaceholder: 'e.g., Tractor, Sprayer',
       farmSetupConfirmTitle: 'Confirm Your Farm Details',
       farmSetupConfirmDesc: 'Please review all the information before completing the setup.',
+      farmSetupConfirmLabelName: 'Farmer Name',
       farmSetupConfirmLabelLocation: 'Location',
       farmSetupConfirmLabelLand: 'Land Size',
       farmSetupConfirmLabelSoil: 'Soil Type',
@@ -333,6 +389,7 @@ export const translations: { [key: string]: Translation } = {
       farmSetupConfirmLabelIrrigation: 'Irrigation Method',
       farmSetupConfirmLabelMachinery: 'Machinery',
       farmSetupCompleteButton: 'Complete Farm Setup',
+      dashboardWelcome: 'Welcome back, {{name}}!',
       dashboardTitle: 'Command Center',
       dashboardSubtitle: 'A complete overview of your farm operations, based on your inputs.',
       kpiTotalInvestment: 'Total Investment',
@@ -375,19 +432,25 @@ export const translations: { [key: string]: Translation } = {
       costTotalInvestment: 'Total Investment',
       costPerAcre: 'Cost per Acre',
       costUpdateButton: 'Save & Update Costs',
-      diseaseScannerTitle: 'AI Disease & Crop Health',
-      diseaseScannerSubtitle: 'Upload a photo of a crop leaf for instant diagnosis and treatment advice.',
-      diseaseScannerUploadLabel: 'Click to upload or drag and drop a photo',
-      diseaseScannerUploadButton: 'Select Photo',
-      diseaseScannerAnalyzing: 'AI is analyzing your crop... Please wait.',
-      diseaseScannerError: 'Sorry, the AI could not analyze the image. Please try another photo.',
-      diseaseScannerResultTitle: 'AI Diagnosis Report',
-      diseaseScannerResultConfidence: 'Confidence',
-      diseaseScannerResultSeverity: 'Severity',
-      diseaseScannerResultExplanation: 'Simple Explanation',
-      diseaseScannerResultTreatment: 'Treatment Steps',
-      diseaseScannerResultCost: 'Estimated Cost (₹)',
-      diseaseScannerResultPrevention: 'Preventive Measures',
+      cropHealthScannerTitle: 'AI Crop Health Scanner',
+      cropHealthScannerSubtitle: 'Upload a photo for instant diagnosis of diseases, pests, and weeds.',
+      cropHealthScannerUploadLabel: 'Click to upload or drag and drop a photo',
+      cropHealthScannerUploadButton: 'Select Photo',
+      cropHealthScannerAnalyzing: 'AI is analyzing your image... Please wait.',
+      cropHealthScannerError: 'Sorry, the AI could not analyze the image. Please try another photo.',
+      cropHealthScannerResultTitle: 'AI Diagnosis Report',
+      cropHealthScannerResultConfidence: 'Confidence',
+      cropHealthScannerResultSeverity: 'Severity',
+      cropHealthScannerResultExplanation: 'Simple Explanation',
+      cropHealthScannerResultTreatment: 'Treatment Steps',
+      cropHealthScannerResultCost: 'Estimated Cost (₹)',
+      cropHealthScannerResultPrevention: 'Preventive Measures',
+      cropHealthScannerSelectType: 'What are you scanning for?',
+      cropHealthScannerTypeDisease: 'Disease',
+      cropHealthScannerTypePest: 'Pest',
+      cropHealthScannerTypeWeed: 'Weed',
+      cropHealthScannerResultThreat: 'Threat Level',
+      cropHealthScannerResultControl: 'Control Methods',
       storageManagerTitle: 'Storage & Capacity Manager',
       storageManagerSubtitle: 'Track your harvested crops, storage capacity, and potential spoilage.',
       storageManagerInputs: 'Storage Details',
@@ -416,6 +479,8 @@ export const translations: { [key: string]: Translation } = {
       profitEngineNetProfit: 'Estimated Net Profit',
       profitEngineBreakEven: 'Break-Even Yield (Quintals/Acre)',
       profitEngineChartTitle: 'Cost vs. Revenue',
+      profitEngineGetPriceSuggestion: 'Get AI Price Suggestion',
+      profitEngineAnalyzingPrice: 'Getting Price...',
       marketIntelTitle: 'Market & Selling Intelligence',
       marketIntelSubtitle: 'Get AI-powered advice on when to sell your crops for maximum profit.',
       marketIntelLocalPriceLabel: 'Your Current Local Mandi Price (₹ per Quintal)',
@@ -467,17 +532,24 @@ export const translations: { [key: string]: Translation } = {
       waterLogButton: 'Log Event',
       waterHistory: 'Irrigation History',
       waterAITip: 'AI Irrigation Tip',
+      govtSchemesTitle: 'Government Schemes & MSP',
+      govtSchemesSubtitle: 'AI-powered information on relevant schemes, MSP, and farmer rights.',
+      centralSchemesTitle: 'Central Government Schemes',
+      stateSchemesTitle: 'State Specific Schemes',
+      mspTitle: 'Minimum Support Price (MSP)',
+      farmerRightsTitle: 'Key Farmer Rights',
       micPermissionDenied: "Microphone access denied. Please enable it in your browser settings to use voice commands.",
       gpsPermissionDenied: "Location access denied. Please enable it in your browser settings to use this feature.",
       speakFarmSetupIntro: 'Welcome to Krushi Mitra. First, let’s set up your farm profile to get started.',
       speakFarmSetupLanguageIntro: 'Welcome to Krushi Mitra. Please select or speak your preferred language to continue.',
+      speakFarmSetupName: 'Please tell me your full name.',
       speakFarmSetupLocation: 'Please enter your location, like your district and state, or use your GPS.',
       speakFarmSetupLandSize: 'Now, tell me the total size of your farm in acres.',
       speakDashboardIntro: 'This is your Command Center. It shows a summary of your farm based on the data you provide.',
       speakWeatherIntro: "This is the Weather Hub. Here you'll find detailed forecasts and AI advice for your location.",
       speakWaterIntro: "This is the Water Management module. Track and optimize your farm's water usage here.",
       speakCostManagerIntro: 'Use this screen to enter all your costs for the season. This is important for accurate profit calculation.',
-      speakDiseaseScannerIntro: 'Please upload a clear photo of the affected crop leaf for analysis.',
+      speakCropHealthScannerIntro: 'Please select what you want to scan for, then upload a clear photo for analysis.',
       speakStorageManagerIntro: 'Enter your harvest and storage details to manage your inventory.',
       speakProfitEngineIntro: 'Enter your expected yield and market price to calculate your potential profit.',
       speakMarketIntelIntro: 'Enter your local mandi price to get an AI-powered selling recommendation.',
@@ -535,25 +607,43 @@ export const translations: { [key: string]: Translation } = {
       back: 'వెనుకకు',
       save: 'ఖర్చులను సేవ్ చేయండి',
       confirm: 'నిర్ధారించి పూర్తి చేయండి',
+      learnMore: 'మరింత తెలుసుకోండి',
+      landingSubtitle: 'తెలివైన, లాభదాయకమైన మరియు స్థిరమైన వ్యవసాయం కోసం మీ వ్యక్తిగత AI-ఆధారిత సహచరుడు.',
+      landingVisionTitle: 'మా దృష్టి',
+      landingVisionText: 'భారతదేశంలోని ప్రతి రైతుకు డేటా మరియు AI శక్తిని తీసుకురావడం, వ్యవసాయాన్ని తరతరాలకు మరింత లాభదాయకంగా మరియు స్థిరంగా మార్చడం.',
+      landingMissionTitle: 'మా లక్ష్యం',
+      landingMissionText: 'వ్యవసాయ నిర్వహణను సులభతరం చేసే, నిజ-సమయ వ్యూహాత్మక సలహాలను అందించే మరియు రైతులకు కీలక సమాచారాన్ని వారి స్వంత భాషలో అందించే సమగ్ర డిజిటల్ సాధనాన్ని అందించడం.',
+      landingHowItWorksTitle: 'మీ డేటా కృషి మిత్రను ఎలా శక్తివంతం చేస్తుంది',
+      landingHowItWorksSubtitle: 'కృషి మిత్ర యొక్క ఖచ్చితత్వం మరియు వ్యక్తిగతీకరించిన సలహా పూర్తిగా మీరు అందించిన సమాచారంపై ఆధారపడి ఉంటుంది. మీ వ్యవసాయ ప్రొఫైల్‌ను సెటప్ చేయడం ద్వారా, మీరు దీని కోసం ఖచ్చితమైన, AI-ఆధారిత అంతర్దృష్టులను అన్‌లాక్ చేస్తారు:',
+      landingFeature1: 'ఖచ్చితమైన ఖర్చు & లాభాల లెక్కలు',
+      landingFeature2: 'అనుకూల వ్యూహాత్మక ప్రమాద సలహా',
+      landingFeature3: 'అనుకూలమైన వ్యాధి & తెగుళ్ళ నియంత్రణ',
+      landingFeature4: 'హైపర్-లోకల్ వాతావరణం & మార్కెట్ అంతర్దృష్టులు',
+      landingStartButton: 'ప్రారంభిద్దాం',
       navDashboard: 'కమాండ్ సెంటర్',
       navWeatherHub: 'వాతావరణ కేంద్రం',
       navWaterManage: 'నీటి యాజమాన్యం',
       navCostManager: 'ఖర్చుల నిర్వాహకం',
-      navDiseaseScanner: 'వ్యాధి స్కానర్',
+      navCropHealthScanner: 'పంట ఆరోగ్య స్కానర్',
       navStorageManager: 'నిల్వ నిర్వాహకం',
       navProfitEngine: 'లాభాల ఇంజిన్',
       navMarketIntel: 'మార్కెట్ ఇంటెల్',
       navNotebook: 'నోట్బుక్',
       navStrategicAdvisor: 'వ్యూహాత్మక సలహాదారు',
+      navGovtSchemes: 'ప్రభుత్వ పథకాలు & MSP',
       headerStatus: 'స్థితి',
       headerStatusText: 'కార్యకలాపంలో ఉంది',
       farmSetupTitle: 'కృషి మిత్రకు స్వాగతం',
       farmSetupSubtitle: 'AI-ఆధారిత సలహా కోసం మీ వ్యవసాయ ప్రొఫైల్‌ను సెటప్ చేద్దాం.',
       farmSetupLanguageSelectPrompt: 'దయచేసి మీ భాషను ఎంచుకోండి లేదా మాట్లాడండి',
+      farmSetupStepPersonal: 'మీ పేరు',
       farmSetupStep1: 'ప్రాంతం',
       farmSetupStep2: 'పొలం బేసిక్స్',
       farmSetupStep3: 'మౌలిక సదుపాయాలు',
       farmSetupStep4: 'నిర్ధారణ',
+      farmSetupPersonalTitle: 'మేము మిమ్మల్ని ఏమని పిలవాలి?',
+      farmSetupFarmerNameLabel: 'మీ పూర్తి పేరు',
+      farmSetupFarmerNamePlaceholder: 'ఉదా., రమేష్ కుమార్',
       farmSetupLocationTitle: 'మీ పొలం ఎక్కడ ఉంది?',
       farmSetupLocationDesc: 'ఖచ్చితమైన వాతావరణ మరియు మార్కెట్ డేటా కోసం ఇది సహాయపడుతుంది.',
       farmSetupLocationLabel: 'మీ ప్రాంతం (జిల్లా, రాష్ట్రం)',
@@ -575,6 +665,7 @@ export const translations: { [key: string]: Translation } = {
       farmSetupMachineryPlaceholder: 'ఉదా., ట్రాక్టర్, స్ప్రేయర్',
       farmSetupConfirmTitle: 'మీ పొలం వివరాలను నిర్ధారించండి',
       farmSetupConfirmDesc: 'సెటప్ పూర్తి చేసే ముందు దయచేసి మొత్తం సమాచారాన్ని సమీక్షించండి.',
+      farmSetupConfirmLabelName: 'రైతు పేరు',
       farmSetupConfirmLabelLocation: 'ప్రాంతం',
       farmSetupConfirmLabelLand: 'భూమి',
       farmSetupConfirmLabelSoil: 'నేల రకం',
@@ -584,6 +675,7 @@ export const translations: { [key: string]: Translation } = {
       farmSetupConfirmLabelIrrigation: 'నీటిపారుదల',
       farmSetupConfirmLabelMachinery: 'యంత్రాలు',
       farmSetupCompleteButton: 'పొలం సెటప్ పూర్తి చేయండి',
+      dashboardWelcome: 'తిరిగి స్వాగతం, {{name}}!',
       dashboardTitle: 'కమాండ్ సెంటర్',
       dashboardSubtitle: 'మీ ఇన్‌పుట్‌ల ఆధారంగా మీ వ్యవసాయ కార్యకలాపాల పూర్తి అవలోకనం.',
       kpiTotalInvestment: 'మొత్తం పెట్టుబడి',
@@ -626,19 +718,25 @@ export const translations: { [key: string]: Translation } = {
       costTotalInvestment: 'మొత్తం పెట్టుబడి',
       costPerAcre: 'ఎకరాకు ఖర్చు',
       costUpdateButton: 'ఖర్చులను సేవ్ & అప్‌డేట్ చేయండి',
-      diseaseScannerTitle: 'AI వ్యాధి & పంట ఆరోగ్యం',
-      diseaseScannerSubtitle: 'తక్షణ నిర్ధారణ మరియు చికిత్స సలహా కోసం పంట ఆకు ఫోటోను అప్‌లోడ్ చేయండి.',
-      diseaseScannerUploadLabel: 'ఫోటోను అప్‌లోడ్ చేయడానికి క్లిక్ చేయండి లేదా డ్రాగ్ చేసి డ్రాప్ చేయండి',
-      diseaseScannerUploadButton: 'ఫోటోను ఎంచుకోండి',
-      diseaseScannerAnalyzing: 'AI మీ పంటను విశ్లేషిస్తోంది... దయచేసి వేచి ఉండండి.',
-      diseaseScannerError: 'క్షమించండి, AI చిత్రాన్ని విశ్లేషించలేకపోయింది. దయచేసి మరో ఫోటోను ప్రయత్నించండి.',
-      diseaseScannerResultTitle: 'AI నిర్ధారణ నివేదిక',
-      diseaseScannerResultConfidence: 'విశ్వాసం',
-      diseaseScannerResultSeverity: 'తీవ్రత',
-      diseaseScannerResultExplanation: 'సాధారణ వివరణ',
-      diseaseScannerResultTreatment: 'చికిత్స దశలు',
-      diseaseScannerResultCost: 'అంచనా ఖర్చు (₹)',
-      diseaseScannerResultPrevention: 'నివారణ చర్యలు',
+      cropHealthScannerTitle: 'AI పంట ఆరోగ్య స్కానర్',
+      cropHealthScannerSubtitle: 'వ్యాధులు, తెగుళ్ళు మరియు కలుపు మొక్కల తక్షణ నిర్ధారణ కోసం ఫోటోను అప్‌లోడ్ చేయండి.',
+      cropHealthScannerUploadLabel: 'ఫోటోను అప్‌లోడ్ చేయడానికి క్లిక్ చేయండి లేదా డ్రాగ్ చేసి డ్రాప్ చేయండి',
+      cropHealthScannerUploadButton: 'ఫోటోను ఎంచుకోండి',
+      cropHealthScannerAnalyzing: 'AI మీ చిత్రాన్ని విశ్లేషిస్తోంది... దయచేసి వేచి ఉండండి.',
+      cropHealthScannerError: 'క్షమించండి, AI చిత్రాన్ని విశ్లేషించలేకపోయింది. దయచేసి మరో ఫోటోను ప్రయత్నించండి.',
+      cropHealthScannerResultTitle: 'AI నిర్ధారణ నివేదిక',
+      cropHealthScannerResultConfidence: 'విశ్వాసం',
+      cropHealthScannerResultSeverity: 'తీవ్రత',
+      cropHealthScannerResultExplanation: 'సాధారణ వివరణ',
+      cropHealthScannerResultTreatment: 'చికిత్స దశలు',
+      cropHealthScannerResultCost: 'అంచనా ఖర్చు (₹)',
+      cropHealthScannerResultPrevention: 'నివారణ చర్యలు',
+      cropHealthScannerSelectType: 'మీరు దేని కోసం స్కాన్ చేస్తున్నారు?',
+      cropHealthScannerTypeDisease: 'వ్యాధి',
+      cropHealthScannerTypePest: 'తెగులు',
+      cropHealthScannerTypeWeed: 'కలుపు మొక్క',
+      cropHealthScannerResultThreat: 'ప్రమాద స్థాయి',
+      cropHealthScannerResultControl: 'నియంత్రణ పద్ధతులు',
       storageManagerTitle: 'నిల్వ & సామర్థ్య నిర్వాహకం',
       storageManagerSubtitle: 'మీ కోసిన పంటలు, నిల్వ సామర్థ్యం మరియు సంభావ్య నష్టాన్ని ట్రాక్ చేయండి.',
       storageManagerInputs: 'నిల్వ వివరాలు',
@@ -667,6 +765,8 @@ export const translations: { [key: string]: Translation } = {
       profitEngineNetProfit: 'అంచనా నికర లాభం',
       profitEngineBreakEven: 'బ్రేక్-ఈవెన్ దిగుబడి (క్వింటాళ్లు/ఎకరం)',
       profitEngineChartTitle: 'ఖర్చు vs. ఆదాయం',
+      profitEngineGetPriceSuggestion: 'AI ధర సూచన పొందండి',
+      profitEngineAnalyzingPrice: 'ధరను పొందుతోంది...',
       marketIntelTitle: 'మార్కెట్ & అమ్మకాల ఇంటెలిజెన్స్',
       marketIntelSubtitle: 'గరిష్ట లాభం కోసం మీ పంటలను ఎప్పుడు అమ్మాలో AI-ఆధారిత సలహా పొందండి.',
       marketIntelLocalPriceLabel: 'మీ ప్రస్తుత స్థానిక మండీ ధర (₹/క్వింటాల్)',
@@ -718,17 +818,24 @@ export const translations: { [key: string]: Translation } = {
       waterLogButton: 'ఈవెంట్‌ను లాగ్ చేయండి',
       waterHistory: 'నీటిపారుదల చరిత్ర',
       waterAITip: 'AI నీటిపారుదల చిట్కా',
+      govtSchemesTitle: 'ప్రభుత్వ పథకాలు & MSP',
+      govtSchemesSubtitle: 'సంబంధిత పథకాలు, MSP మరియు రైతు హక్కులపై AI-ఆధారిత సమాచారం.',
+      centralSchemesTitle: 'కేంద్ర ప్రభుత్వ పథకాలు',
+      stateSchemesTitle: 'రాష్ట్ర నిర్దిష్ట పథకాలు',
+      mspTitle: 'కనీస మద్దతు ధర (MSP)',
+      farmerRightsTitle: 'ముఖ్యమైన రైతు హక్కులు',
       micPermissionDenied: "మైక్రోఫోన్ యాక్సెస్ నిరాకరించబడింది. వాయిస్ కమాండ్‌లను ఉపయోగించడానికి దయచేసి మీ బ్రౌజర్ సెట్టింగ్‌లలో దీన్ని ప్రారంభించండి.",
       gpsPermissionDenied: "స్థాన యాక్సెస్ నిరాకరించబడింది. ఈ ఫీచర్‌ను ఉపయోగించడానికి దయచేసి మీ బ్రౌజర్ సెట్టింగ్‌లలో దీన్ని ప్రారంభించండి.",
       speakFarmSetupIntro: 'కృషి మిత్రకు స్వాగతం. మొదట, ప్రారంభించడానికి మీ వ్యవసాయ ప్రొఫైల్‌ను సెటప్ చేద్దాం.',
       speakFarmSetupLanguageIntro: 'కృషి మిత్రకు స్వాగతం. కొనసాగించడానికి దయచేసి మీకు ఇష్టమైన భాషను ఎంచుకోండి లేదా మాట్లాడండి.',
+      speakFarmSetupName: 'దయచేసి మీ పూర్తి పేరు చెప్పండి.',
       speakFarmSetupLocation: 'దయచేసి మీ జిల్లా మరియు రాష్ట్రం వంటి మీ స్థానాన్ని నమోదు చేయండి లేదా మీ GPSని ఉపయోగించండి.',
       speakFarmSetupLandSize: 'ఇప్పుడు, మీ పొలం మొత్తం పరిమాణాన్ని ఎకరాలలో చెప్పండి.',
       speakDashboardIntro: 'ఇది మీ కమాండ్ సెంటర్. మీరు అందించిన డేటా ఆధారంగా ఇది మీ పొలం యొక్క సారాంశాన్ని చూపుతుంది.',
       speakWeatherIntro: "ఇది వాతావరణ కేంద్రం. ఇక్కడ మీరు మీ స్థానం కోసం వివరణాత్మక అంచనాలు మరియు AI సలహాలను కనుగొంటారు.",
       speakWaterIntro: "ఇది నీటి నిర్వహణ మాడ్యూల్. ఇక్కడ మీ పొలం యొక్క నీటి వినియోగాన్ని ట్రాక్ చేయండి మరియు ఆప్టిమైజ్ చేయండి.",
       speakCostManagerIntro: 'ఈ కాలానికి మీ అన్ని ఖర్చులను నమోదు చేయడానికి ఈ స్క్రీన్‌ను ఉపయోగించండి. ఖచ్చితమైన లాభాల లెక్కింపు కోసం ఇది ముఖ్యం.',
-      speakDiseaseScannerIntro: 'దయచేసి విశ్లేషణ కోసం ప్రభావిత పంట ఆకు యొక్క స్పష్టమైన ఫోటోను అప్‌లోడ్ చేయండి.',
+      speakCropHealthScannerIntro: 'దయచేసి మీరు దేని కోసం స్కాన్ చేయాలనుకుంటున్నారో ఎంచుకుని, ఆపై విశ్లేషణ కోసం స్పష్టమైన ఫోటోను అప్‌లోడ్ చేయండి.',
       speakStorageManagerIntro: 'మీ ఇన్వెంటరీని నిర్వహించడానికి మీ పంట మరియు నిల్వ వివరాలను నమోదు చేయండి.',
       speakProfitEngineIntro: 'మీ సంభావ్య లాభాన్ని లెక్కించడానికి మీ అంచనా దిగుబడి మరియు మార్కెట్ ధరను నమోదు చేయండి.',
       speakMarketIntelIntro: 'AI-ఆధారిత అమ్మకపు సిఫార్సును పొందడానికి మీ స్థానిక మండీ ధరను నమోదు చేయండి.',
@@ -786,25 +893,43 @@ export const translations: { [key: string]: Translation } = {
       back: 'वापस',
       save: 'लागत बचाएं',
       confirm: 'पुष्टि करें और समाप्त करें',
+      learnMore: 'और जानें',
+      landingSubtitle: 'स्मार्ट, अधिक लाभदायक और टिकाऊ खेती के लिए आपका व्यक्तिगत एआई-संचालित साथी।',
+      landingVisionTitle: 'हमारा दृष्टिकोण',
+      landingVisionText: 'भारत के हर किसान तक डेटा और एआई की शक्ति पहुंचाना, कृषि को आने वाली पीढ़ियों के लिए अधिक लाभदायक और टिकाऊ बनाना।',
+      landingMissionTitle: 'हमारा मिशन',
+      landingMissionText: 'एक व्यापक डिजिटल उपकरण प्रदान करना जो कृषि प्रबंधन को सरल बनाता है, वास्तविक समय में रणनीतिक सलाह देता है, और किसानों को उनकी अपनी भाषा में महत्वपूर्ण जानकारी से जोड़ता है।',
+      landingHowItWorksTitle: 'आपका डेटा कृषि मित्र को कैसे शक्ति प्रदान करता है',
+      landingHowItWorksSubtitle: 'कृषि मित्र की सटीकता और व्यक्तिगत सलाह पूरी तरह से आपके द्वारा प्रदान की गई जानकारी पर निर्भर करती है। अपनी कृषि प्रोफ़ाइल स्थापित करके, आप इनके लिए सटीक, एआई-संचालित अंतर्दृष्टि अनलॉक करते हैं:',
+      landingFeature1: 'सटीक लागत और लाभ की गणना',
+      landingFeature2: 'कस्टम रणनीतिक जोखिम सलाह',
+      landingFeature3: 'अनुरूपित रोग और कीट नियंत्रण',
+      landingFeature4: 'हाइपर-लोकल मौसम और बाजार अंतर्दृष्टि',
+      landingStartButton: 'चलिए शुरू करते हैं',
       navDashboard: 'कमांड सेंटर',
       navWeatherHub: 'मौसम हब',
       navWaterManage: 'जल प्रबंधन',
       navCostManager: 'लागत प्रबंधक',
-      navDiseaseScanner: 'रोग स्कैनर',
+      navCropHealthScanner: 'फसल स्वास्थ्य स्कैनर',
       navStorageManager: 'भंडारण प्रबंधक',
       navProfitEngine: 'लाभ इंजन',
       navMarketIntel: 'बाजार इंटेल',
       navNotebook: 'नोटबुक',
       navStrategicAdvisor: 'रणनीतिक सलाहकार',
+      navGovtSchemes: 'सरकारी योजनाएं और MSP',
       headerStatus: 'स्थिति',
       headerStatusText: 'चालू है',
       farmSetupTitle: 'कृषि मित्र में आपका स्वागत है',
       farmSetupSubtitle: 'आइए सटीक, एआई-संचालित सलाह के लिए आपकी कृषि प्रोफ़ाइल सेट करें।',
       farmSetupLanguageSelectPrompt: 'कृपया अपनी भाषा चुनें या बोलें',
+      farmSetupStepPersonal: 'आपका नाम',
       farmSetupStep1: 'स्थान',
       farmSetupStep2: 'खेत की मूल बातें',
       farmSetupStep3: 'बुनियादी ढाँचा',
       farmSetupStep4: 'पुष्टिकरण',
+      farmSetupPersonalTitle: 'हम आपको क्या कहकर बुलाएं?',
+      farmSetupFarmerNameLabel: 'आपका पूरा नाम',
+      farmSetupFarmerNamePlaceholder: 'जैसे, रमेश कुमार',
       farmSetupLocationTitle: 'आपका खेत कहाँ स्थित है?',
       farmSetupLocationDesc: 'सटीक स्थान सटीक मौसम और बाजार डेटा प्रदान करने में मदद करता है।',
       farmSetupLocationLabel: 'आपका स्थान (जिला, राज्य)',
@@ -826,6 +951,7 @@ export const translations: { [key: string]: Translation } = {
       farmSetupMachineryPlaceholder: 'जैसे, ट्रैक्टर, स्प्रेयर',
       farmSetupConfirmTitle: 'अपने खेत के विवरण की पुष्टि करें',
       farmSetupConfirmDesc: 'सेटअप पूरा करने से पहले कृपया सभी जानकारी की समीक्षा करें।',
+      farmSetupConfirmLabelName: 'किसान का नाम',
       farmSetupConfirmLabelLocation: 'स्थान',
       farmSetupConfirmLabelLand: 'भूमि का आकार',
       farmSetupConfirmLabelSoil: 'मिट्टी का प्रकार',
@@ -835,6 +961,7 @@ export const translations: { [key: string]: Translation } = {
       farmSetupConfirmLabelIrrigation: 'सिंचाई',
       farmSetupConfirmLabelMachinery: 'मशीनरी',
       farmSetupCompleteButton: 'फार्म सेटअप पूरा करें',
+      dashboardWelcome: 'वापसी पर स्वागत है, {{name}}!',
       dashboardTitle: 'कमांड सेंटर',
       dashboardSubtitle: 'आपके इनपुट के आधार पर आपके कृषि कार्यों का एक पूरा अवलोकन।',
       kpiTotalInvestment: 'कुल निवेश',
@@ -877,19 +1004,25 @@ export const translations: { [key: string]: Translation } = {
       costTotalInvestment: 'कुल निवेश',
       costPerAcre: 'लागत प्रति एकड़',
       costUpdateButton: 'लागत सहेजें और अपडेट करें',
-      diseaseScannerTitle: 'एआई रोग और फसल स्वास्थ्य',
-      diseaseScannerSubtitle: 'तत्काल निदान और उपचार सलाह के लिए फसल के पत्ते की एक तस्वीर अपलोड करें।',
-      diseaseScannerUploadLabel: 'अपलोड करने के लिए क्लिक करें या एक तस्वीर खींचें और छोड़ें',
-      diseaseScannerUploadButton: 'फोटो चुनें',
-      diseaseScannerAnalyzing: 'एआई आपकी फसल का विश्लेषण कर रहा है... कृपया प्रतीक्षा करें।',
-      diseaseScannerError: 'क्षमा करें, एआई छवि का विश्लेषण नहीं कर सका। कृपया कोई दूसरी तस्वीर आज़माएँ।',
-      diseaseScannerResultTitle: 'एआई निदान रिपोर्ट',
-      diseaseScannerResultConfidence: 'आत्मविश्वास',
-      diseaseScannerResultSeverity: 'गंभीरता',
-      diseaseScannerResultExplanation: 'सरल स्पष्टीकरण',
-      diseaseScannerResultTreatment: 'उपचार के चरण',
-      diseaseScannerResultCost: 'अनुमानित लागत (₹)',
-      diseaseScannerResultPrevention: 'निवारक उपाय',
+      cropHealthScannerTitle: 'एआई फसल स्वास्थ्य स्कैनर',
+      cropHealthScannerSubtitle: 'रोगों, कीटों और खरपतवारों के तत्काल निदान के लिए एक तस्वीर अपलोड करें।',
+      cropHealthScannerUploadLabel: 'अपलोड करने के लिए क्लिक करें या एक तस्वीर खींचें और छोड़ें',
+      cropHealthScannerUploadButton: 'फोटो चुनें',
+      cropHealthScannerAnalyzing: 'एआई आपकी छवि का विश्लेषण कर रहा है... कृपया प्रतीक्षा करें।',
+      cropHealthScannerError: 'क्षमा करें, एआई छवि का विश्लेषण नहीं कर सका। कृपया कोई दूसरी तस्वीर आज़माएँ।',
+      cropHealthScannerResultTitle: 'एआई निदान रिपोर्ट',
+      cropHealthScannerResultConfidence: 'आत्मविश्वास',
+      cropHealthScannerResultSeverity: 'गंभीरता',
+      cropHealthScannerResultExplanation: 'सरल स्पष्टीकरण',
+      cropHealthScannerResultTreatment: 'उपचार के चरण',
+      cropHealthScannerResultCost: 'अनुमानित लागत (₹)',
+      cropHealthScannerResultPrevention: 'निवारक उपाय',
+      cropHealthScannerSelectType: 'आप क्या स्कैन कर रहे हैं?',
+      cropHealthScannerTypeDisease: 'रोग',
+      cropHealthScannerTypePest: 'कीट',
+      cropHealthScannerTypeWeed: 'खरपतवार',
+      cropHealthScannerResultThreat: 'खतरे का स्तर',
+      cropHealthScannerResultControl: 'नियंत्रण के तरीके',
       storageManagerTitle: 'भंडारण और क्षमता प्रबंधक',
       storageManagerSubtitle: 'अपनी काटी हुई फसलों, भंडारण क्षमता और संभावित खराबी को ट्रैक करें।',
       storageManagerInputs: 'भंडारण विवरण',
@@ -918,6 +1051,8 @@ export const translations: { [key: string]: Translation } = {
       profitEngineNetProfit: 'अनुमानित शुद्ध लाभ',
       profitEngineBreakEven: 'ब्रेक-ईवन उपज (क्विंटल/एकड़)',
       profitEngineChartTitle: 'लागत बनाम राजस्व',
+      profitEngineGetPriceSuggestion: 'एआई मूल्य सुझाव प्राप्त करें',
+      profitEngineAnalyzingPrice: 'कीमत मिल रही है...',
       marketIntelTitle: 'बाजार और बिक्री खुफिया',
       marketIntelSubtitle: 'अधिकतम लाभ के लिए अपनी फसलें कब बेचें, इस पर एआई-संचालित सलाह प्राप्त करें।',
       marketIntelLocalPriceLabel: 'आपकी वर्तमान स्थानीय मंडी कीमत (₹/क्विంటల్)',
@@ -969,17 +1104,24 @@ export const translations: { [key: string]: Translation } = {
       waterLogButton: 'घटना लॉग करें',
       waterHistory: 'सिंचाई का इतिहास',
       waterAITip: 'एआई सिंचाई युक्ति',
+      govtSchemesTitle: 'सरकारी योजनाएं और MSP',
+      govtSchemesSubtitle: 'प्रासंगिक योजनाओं, MSP, और किसान अधिकारों पर AI-संचालित जानकारी।',
+      centralSchemesTitle: 'केंद्र सरकार की योजनाएं',
+      stateSchemesTitle: 'राज्य विशिष्ट योजनाएं',
+      mspTitle: 'न्यूनतम समर्थन मूल्य (MSP)',
+      farmerRightsTitle: 'प्रमुख किसान अधिकार',
       micPermissionDenied: "माइक्रोफ़ोन एक्सेस अस्वीकृत। वॉइस कमांड का उपयोग करने के लिए कृपया इसे अपनी ब्राउज़र सेटिंग्स में सक्षम करें।",
       gpsPermissionDenied: "स्थान एक्सेस अस्वीकृत। इस सुविधा का उपयोग करने के लिए कृपया इसे अपनी ब्राउज़र सेटिंग्स में सक्षम करें।",
       speakFarmSetupIntro: 'कृषि मित्र में आपका स्वागत है। सबसे पहले, शुरू करने के लिए अपनी कृषि प्रोफ़ाइल सेट करें।',
       speakFarmSetupLanguageIntro: 'कृषि मित्र में आपका स्वागत है। जारी रखने के लिए कृपया अपनी पसंदीदा भाषा चुनें या बोलें।',
+      speakFarmSetupName: 'कृपया मुझे अपना पूरा नाम बताएं।',
       speakFarmSetupLocation: 'कृपया अपना स्थान दर्ज करें, जैसे कि आपका जिला और राज्य, या अपने जीपीएस का उपयोग करें।',
       speakFarmSetupLandSize: 'अब, मुझे एकड़ में अपने खेत का कुल आकार बताएं।',
       speakDashboardIntro: 'यह आपका कमांड सेंटर है। यह आपके द्वारा प्रदान किए गए डेटा के आधार पर आपके खेत का सारांश दिखाता है।',
       speakWeatherIntro: "यह वेदर हब है। यहां आपको अपने स्थान के लिए विस्तृत पूर्वानुमान और एआई सलाह मिलेगी।",
       speakWaterIntro: "यह जल प्रबंधन मॉड्यूल है। यहां अपने खेत के पानी के उपयोग को ट्रैक और अनुकूलित करें।",
       speakCostManagerIntro: 'इस मौसम के लिए अपनी सभी लागतों को दर्ज करने के लिए इस स्क्रीन का उपयोग करें। सटीक लाभ गणना के लिए यह महत्वपूर्ण है।',
-      speakDiseaseScannerIntro: 'कृपया विश्लेषण के लिए प्रभावित फसल के पत्ते की एक स्पष्ट तस्वीर अपलोड करें।',
+      speakCropHealthScannerIntro: 'कृपया चुनें कि आप क्या स्कैन करना चाहते हैं, फिर विश्लेषण के लिए एक स्पष्ट तस्वीर अपलोड करें।',
       speakStorageManagerIntro: 'अपनी इन्वेंट्री को प्रबंधित करने के लिए अपनी फसल और भंडारण विवरण दर्ज करें।',
       speakProfitEngineIntro: 'अपने संभावित लाभ की गणना के लिए अपनी अपेक्षित उपज और बाजार मूल्य दर्ज करें।',
       speakMarketIntelIntro: 'एआई-संचालित बिक्री अनुशंसा प्राप्त करने के लिए अपनी स्थानीय मंडी कीमत दर्ज करें।',
@@ -1037,25 +1179,43 @@ export const translations: { [key: string]: Translation } = {
       back: 'پیچھے',
       save: 'اخراجات محفوظ کریں',
       confirm: 'تصدیق کریں اور ختم کریں',
+      learnMore: 'مزید جانیں',
+      landingSubtitle: 'ہوشیار، زیادہ منافع بخش، اور پائیدار کاشتکاری کے لیے آپ کا ذاتی AI سے چلنے والا ساتھی۔',
+      landingVisionTitle: 'ہمارا وژن',
+      landingVisionText: 'ہندوستان کے ہر کسان تک ڈیٹا اور AI کی طاقت پہنچانا، زراعت کو آنے والی نسلوں کے لیے زیادہ منافع بخش اور پائیدار بنانا۔',
+      landingMissionTitle: 'ہمارا مشن',
+      landingMissionText: 'ایک جامع ڈیجیٹل ٹول فراہم کرنا جو فارم کے انتظام کو آسان بناتا ہے، حقیقی وقت میں اسٹریٹجک مشورہ دیتا ہے، اور کسانوں کو ان کی اپنی زبان میں اہم معلومات سے جوڑتا ہے۔',
+      landingHowItWorksTitle: 'آپ کا ڈیٹا کرشی مترا کو کیسے طاقت دیتا ہے',
+      landingHowItWorksSubtitle: 'کرشی مترا کی درستگی اور ذاتی مشورہ مکمل طور پر آپ کی فراہم کردہ معلومات پر منحصر ہے۔ اپنے فارم کا پروفائل ترتیب دے کر، آپ ان کے لیے درست، AI سے چلنے والی بصیرت کو غیر مقفل کرتے ہیں:',
+      landingFeature1: 'درست لاگت اور منافع کا حساب',
+      landingFeature2: 'کسٹم اسٹریٹجک رسک ایڈوائس',
+      landingFeature3: ' موزوں بیماری اور کیڑوں پر قابو',
+      landingFeature4: 'ہائپر لوکل موسم اور مارکیٹ کی بصیرت',
+      landingStartButton: 'آئیے شروع کریں',
       navDashboard: 'کمانڈ سینٹر',
       navWeatherHub: 'موسم کا مرکز',
       navWaterManage: 'پانی کا انتظام',
       navCostManager: 'لاگت کا مینیجر',
-      navDiseaseScanner: 'بیماری کا اسکینر',
+      navCropHealthScanner: 'فصل صحت سکینر',
       navStorageManager: 'اسٹوریج مینیجر',
       navProfitEngine: 'منافع کا انجن',
       navMarketIntel: 'مارکیٹ انٹیل',
       navNotebook: 'نوٹ بک',
       navStrategicAdvisor: 'اسٹریٹجک مشیر',
+      navGovtSchemes: 'سرکاری اسکیمیں اور MSP',
       headerStatus: 'حیثیت',
       headerStatusText: 'فعال',
       farmSetupTitle: 'کرشی مترا میں خوش آمدید',
       farmSetupSubtitle: 'آئیے آپ کے فارم پروفائل کو درست، AI سے چلنے والی सलाह کے لیے ترتیب دیں۔',
       farmSetupLanguageSelectPrompt: 'براہ کرم اپنی زبان منتخب کریں یا بولیں',
+      farmSetupStepPersonal: 'آپ کا نام',
       farmSetupStep1: 'مقام',
       farmSetupStep2: 'فارم کی بنیادی باتیں',
       farmSetupStep3: 'بنیادی ڈھانچہ',
       farmSetupStep4: 'تصدیق',
+      farmSetupPersonalTitle: 'ہم آپ کو کیا کہہ کر پکاریں؟',
+      farmSetupFarmerNameLabel: 'آپ کا پورا نام',
+      farmSetupFarmerNamePlaceholder: 'مثال کے طور پر، رمیش کمار',
       farmSetupLocationTitle: 'آپ کا فارم کہاں واقع ہے؟',
       farmSetupLocationDesc: 'درست مقام موسم اور مارکیٹ کا درست ڈیٹا فراہم کرنے میں مدد کرتا ہے۔',
       farmSetupLocationLabel: 'آپ کا مقام (ضلع، ریاست)',
@@ -1077,6 +1237,7 @@ export const translations: { [key: string]: Translation } = {
       farmSetupMachineryPlaceholder: 'مثال کے طور پر، ٹریکٹر، سپرےر',
       farmSetupConfirmTitle: 'اپنے فارم کی تفصیلات کی تصدیق کریں',
       farmSetupConfirmDesc: 'سیٹ اپ مکمل کرنے سے پہلے براہ کرم تمام معلومات کا جائزہ لیں۔',
+      farmSetupConfirmLabelName: 'کسان کا نام',
       farmSetupConfirmLabelLocation: 'مقام',
       farmSetupConfirmLabelLand: 'زمین کا سائز',
       farmSetupConfirmLabelSoil: 'مٹی کی قسم',
@@ -1086,6 +1247,7 @@ export const translations: { [key: string]: Translation } = {
       farmSetupConfirmLabelIrrigation: 'آبپاشی',
       farmSetupConfirmLabelMachinery: 'مشینری',
       farmSetupCompleteButton: 'فارم سیٹ اپ مکمل کریں',
+      dashboardWelcome: 'واپسی پر خوش آمدید، {{name}}!',
       dashboardTitle: 'کمانڈ سینٹر',
       dashboardSubtitle: 'آپ کے ان پٹ کی بنیاد پر آپ کے فارم آپریشنز کا ایک مکمل جائزہ۔',
       kpiTotalInvestment: 'کل سرمایہ کاری',
@@ -1128,19 +1290,25 @@ export const translations: { [key: string]: Translation } = {
       costTotalInvestment: 'کل سرمایہ کاری',
       costPerAcre: 'لاگت فی ایکڑ',
       costUpdateButton: 'اخراجات محفوظ اور اپ ڈیٹ کریں',
-      diseaseScannerTitle: 'AI بیماری اور فصل کی صحت',
-      diseaseScannerSubtitle: 'فوری تشخیص اور علاج کے مشورے کے لیے فصل کے پتے کی تصویر اپ لوڈ کریں۔',
-      diseaseScannerUploadLabel: 'اپ لوڈ کرنے کے لیے کلک کریں یا تصویر کو گھسیٹ کر چھوڑ دیں',
-      diseaseScannerUploadButton: 'تصویر منتخب کریں',
-      diseaseScannerAnalyzing: 'AI آپ کی فصل کا تجزیہ کر رہا ہے... براہ کرم انتظار کریں۔',
-      diseaseScannerError: 'معذرت، AI تصویر کا تجزیہ نہیں کر سکا۔ براہ کرم دوسری تصویر آزمائیں۔',
-      diseaseScannerResultTitle: 'AI تشخیصی رپورٹ',
-      diseaseScannerResultConfidence: 'اعتماد',
-      diseaseScannerResultSeverity: 'شدت',
-      diseaseScannerResultExplanation: 'سادہ وضاحت',
-      diseaseScannerResultTreatment: 'علاج کے اقدامات',
-      diseaseScannerResultCost: 'تخمینی لاگت (₹)',
-      diseaseScannerResultPrevention: 'احتیاطی تدابیر',
+      cropHealthScannerTitle: 'AI فصل صحت سکینر',
+      cropHealthScannerSubtitle: 'بیماریوں، کیڑوں اور جڑی بوٹیوں کی فوری تشخیص کے لیے تصویر اپ لوڈ کریں۔',
+      cropHealthScannerUploadLabel: 'اپ لوڈ کرنے کے لیے کلک کریں یا تصویر کو گھسیٹ کر چھوڑ دیں',
+      cropHealthScannerUploadButton: 'تصویر منتخب کریں',
+      cropHealthScannerAnalyzing: 'AI آپ کی تصویر کا تجزیہ کر رہا ہے... براہ کرم انتظار کریں۔',
+      cropHealthScannerError: 'معذرت، AI تصویر کا تجزیہ نہیں کر سکا۔ براہ کرم دوسری تصویر آزمائیں۔',
+      cropHealthScannerResultTitle: 'AI تشخیصی رپورٹ',
+      cropHealthScannerResultConfidence: 'اعتماد',
+      cropHealthScannerResultSeverity: 'شدت',
+      cropHealthScannerResultExplanation: 'سادہ وضاحت',
+      cropHealthScannerResultTreatment: 'علاج کے اقدامات',
+      cropHealthScannerResultCost: 'تخمینی لاگت (₹)',
+      cropHealthScannerResultPrevention: 'احتیاطی تدابیر',
+      cropHealthScannerSelectType: 'آپ کیا اسکین کر رہے ہیں؟',
+      cropHealthScannerTypeDisease: 'بیماری',
+      cropHealthScannerTypePest: 'کیڑا',
+      cropHealthScannerTypeWeed: 'جڑی بوٹی',
+      cropHealthScannerResultThreat: 'خطرے کی سطح',
+      cropHealthScannerResultControl: 'کنٹرول کے طریقے',
       storageManagerTitle: 'اسٹوریج اور صلاحیت کا مینیجر',
       storageManagerSubtitle: 'اپنی کٹائی ہوئی فصلوں، اسٹوریج کی صلاحیت، اور ممکنہ خرابی کو ٹریک کریں۔',
       storageManagerInputs: 'اسٹوریج کی تفصیلات',
@@ -1169,6 +1337,8 @@ export const translations: { [key: string]: Translation } = {
       profitEngineNetProfit: 'تخمینی خالص منافع',
       profitEngineBreakEven: 'بریک ایون پیداوار (کوئنٹل/ایکڑ)',
       profitEngineChartTitle: 'لاگت بمقابلہ آمدنی',
+      profitEngineGetPriceSuggestion: 'AI قیمت کی تجویز حاصل کریں',
+      profitEngineAnalyzingPrice: 'قیمت حاصل کی جا رہی ہے...',
       marketIntelTitle: 'مارکیٹ اور فروخت کی ذہانت',
       marketIntelSubtitle: 'زیادہ سے زیادہ منافع کے لیے اپنی فصلیں کب بیچیں اس پر AI سے چلنے والی सलाह حاصل کریں۔',
       marketIntelLocalPriceLabel: 'آپ کی موجودہ مقامی منڈی کی قیمت (₹ فی کوئنٹل)',
@@ -1220,17 +1390,24 @@ export const translations: { [key: string]: Translation } = {
       waterLogButton: 'واقعہ لاگ کریں',
       waterHistory: 'آبپاشی کی تاریخ',
       waterAITip: 'AI آبپاشی کا مشورہ',
+      govtSchemesTitle: 'سرکاری اسکیمیں اور MSP',
+      govtSchemesSubtitle: 'متعلقہ اسکیموں، MSP، اور کسانوں کے حقوق پر AI سے چلنے والی معلومات۔',
+      centralSchemesTitle: 'مرکزی حکومت کی اسکیمیں',
+      stateSchemesTitle: 'ریاستی مخصوص اسکیمیں',
+      mspTitle: 'کم از کم امدادی قیمت (MSP)',
+      farmerRightsTitle: 'اہم کسانوں کے حقوق',
       micPermissionDenied: "مائیکروفون تک رسائی مسترد کر دی گئی۔ وائس کمانڈز استعمال کرنے کے لیے براہ کرم اسے اپنے براؤزر کی سیٹنگز میں فعال کریں۔",
       gpsPermissionDenied: "مقام تک رسائی مسترد کر دی گئی۔ اس خصوصیت کو استعمال کرنے کے لیے براہ کرم اسے اپنے براؤزر کی ترتیبات میں فعال کریں۔",
       speakFarmSetupIntro: 'کرشی مترا میں خوش آمدید۔ سب سے پہلے، آئیے شروع کرنے کے لیے آپ کا فارم پروفائل ترتیب دیں۔',
       speakFarmSetupLanguageIntro: 'کرشی مترا میں خوش آمدید۔ جاری رکھنے کے لیے براہ کرم اپنی پسندیدہ زبان منتخب کریں یا بولیں۔',
+      speakFarmSetupName: 'براہ کرم مجھے اپنا پورا نام بتائیں۔',
       speakFarmSetupLocation: 'براہ کرم اپنا مقام درج کریں، جیسے آپ کا ضلع اور ریاست، یا اپنا GPS استعمال کریں۔',
       speakFarmSetupLandSize: 'اب، مجھے ایکڑ میں اپنے فارم کا کل سائز بتائیں۔',
       speakDashboardIntro: 'یہ آپ کا کمانڈ سینٹر ہے۔ یہ آپ کے فراہم کردہ ڈیٹا کی بنیاد پر آپ کے فارم کا خلاصہ دکھاتا ہے۔',
       speakWeatherIntro: "یہ ویدر ہب ہے۔ یہاں آپ کو اپنے مقام کے لیے تفصیلی پیشن گوئیاں اور AI مشورے ملیں گے۔",
       speakWaterIntro: "یہ واٹر مینجمنٹ ماڈیول ہے۔ یہاں اپنے فارم کے پانی کے استعمال کو ٹریک اور بہتر بنائیں۔",
       speakCostManagerIntro: 'اس سیزن کے لیے اپنی تمام لاگتیں درج کرنے کے لیے اس اسکرین کا استعمال کریں۔ درست منافع کے حساب کے لیے یہ اہم ہے۔',
-      speakDiseaseScannerIntro: 'براہ کرم تجزیہ کے لیے متاثرہ فصل کے پتے کی ایک واضح تصویر اپ لوڈ کریں۔',
+      speakCropHealthScannerIntro: 'براہ کرم منتخب کریں کہ آپ کیا اسکین کرنا چاہتے ہیں، پھر تجزیہ کے لیے ایک واضح تصویر اپ لوڈ کریں۔',
       speakStorageManagerIntro: 'اپنی انوینٹری کا انتظام کرنے کے لیے اپنی فصل اور اسٹوریج کی تفصیلات درج کریں۔',
       speakProfitEngineIntro: 'اپنے ممکنہ منافع کا حساب لگانے کے لیے اپنی متوقع پیداوار اور مارکیٹ کی قیمت درج کریں۔',
       speakMarketIntelIntro: 'AI سے چلنے والی فروخت کی سفارش حاصل کرنے کے لیے اپنی مقامی منڈی کی قیمت درج کریں۔',
@@ -1238,7 +1415,7 @@ export const translations: { [key: string]: Translation } = {
       speakAdvisorIntro: 'یہ اسٹریٹجک ایڈوائزر ہے۔ یہ فصل کی تبدیلی اور رسک مینجمنٹ جیسے اہم فیصلوں کے لیے AI سے چلنے والی بصیرت فراہم کرتا ہے۔',
       speakAnalysisComplete: 'تجزیہ مکمل ہو گیا ہے۔ یہ رہی رپورٹ۔',
       speakSoilType: "اپنے فارم کی بنیادی مٹی کی قسم منتخب کریں۔",
-      speakCrops: "جو اہم فصلیں آپ لگا رہے ہیں، انہیں کوما سے الگ کرکے درج کریں۔",
+      speakCrops: "جو اہم فصلیں آپ لگا رہے ہیں, انہیں کوما سے الگ کرکے درج کریں۔",
       speakSeason: "موجودہ زرعی موسم کا انتخاب کریں۔",
       speakWaterSource: "آبپاشی کے لیے اپنے پانی کا بنیادی ذریعہ منتخب کریں۔",
       speakIrrigation: "آبپاشی کا اپنا بنیادی طریقہ منتخب کریں۔",
@@ -1264,7 +1441,7 @@ export const translations: { [key: string]: Translation } = {
       speakStorageCost: "اپنی فصل کو ذخیرہ کرنے کی کل لاگت درج کریں۔",
       speakUpdateCostsBtn: "اپنے تمام اخراجات کو محفوظ کرنے اور حسابات کو اپ ڈیٹ کرنے کے لیے یہاں کلک کریں۔",
       speakUploadArea: "اپنے آلے سے متاثرہ فصل کے پتے کی تصویر منتخب کرنے کے لیے یہاں کلک کریں۔",
-      speakAnalyzeCropBtn: "تصویر منتخب करने के बाद، AI تجزیہ شروع करने के लिए यहां کلک کریں۔",
+      speakAnalyzeCropBtn: "تصویر منتخب کرنے کے بعد، AI تجزیہ شروع کرنے کے لیے یہاں کلک کریں۔",
       speakStorageCrop: "وہ فصل منتخب کریں جسے آپ نے کاٹا ہے اور ذخیرہ کر رہے ہیں۔",
       speakHarvestedQty: "کٹائی کی کل مقدار کوئنٹل میں درج کریں۔",
       speakStorageType: "اس سہولت کی قسم منتخب کریں جہاں آپ اپنی فصل ذخیرہ کر رہے ہیں۔",
@@ -1276,7 +1453,7 @@ export const translations: { [key: string]: Translation } = {
       speakMarketPrice: "اپنے قریبی مقامی مارکیٹ یا منڈی میں موجودہ فروخت کی قیمت درج کریں۔",
       speakGetMarketAdviceBtn: "ابھی بیچنے یا اپنی فصل کو ذخیرہ کرنے کے بارے میں AI سے چلنے والی सलाह حاصل کرنے کے لیے یہاں کلک کریں۔",
       speakNotebookText: "آپ اپنے نوٹ یہاں ٹائپ کر سکتے ہیں۔",
-      speakNotebookMicBtn: "اپنی آواز سے نوٹ ریکارڈ کرنا شروع کرنے یا روکنے کے لیے इस बटन पर क्लिक करें।",
+      speakNotebookMicBtn: "اپنی آواز سے نوٹ ریکارڈ کرنا شروع کرنے یا روکنے کے لیے اس بٹن پر کلک کریں۔",
       speakNotebookAddBtn: "اس نوٹ کو اپنی نوٹ بک میں محفوظ کرنے کے لیے کلک کریں۔",
     }
   },

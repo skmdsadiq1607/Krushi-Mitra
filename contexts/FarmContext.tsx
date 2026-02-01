@@ -15,6 +15,7 @@ export interface WaterLogEvent {
 // Defines the shape of all data the farmer will input
 export interface FarmData {
   farmDetails: {
+    farmerName: string;
     location: string;
     landSize: number;
     soilType: string;
@@ -61,6 +62,7 @@ const FarmContext = createContext<FarmContextType | undefined>(undefined);
 
 const initialFarmData: FarmData = {
     farmDetails: {
+        farmerName: '',
         location: '',
         landSize: 0,
         soilType: '',
@@ -193,8 +195,11 @@ export const FarmProvider = ({ children }: PropsWithChildren) => {
   const resetFarm = () => {
     localStorage.removeItem('krushi_mitra_farm_data');
     localStorage.removeItem('krushi_mitra_language');
+    localStorage.removeItem('krushi_mitra_has_started');
     setFarmData(initialFarmData);
     setIsFarmSetupComplete(false);
+    // Reloading is the most reliable way to reset the app state and show the landing page.
+    window.location.reload();
   };
 
   if (isLoading) {

@@ -73,10 +73,16 @@ const FarmNotebook: React.FC = () => {
         }
         if (isListening) {
             recognition.stop();
+            setIsListening(false);
         } else {
-            recognition.start();
+            try {
+                recognition.start();
+                setIsListening(true);
+            } catch(e) {
+                console.error("Could not start recognition", e);
+                setIsListening(false);
+            }
         }
-        setIsListening(!isListening);
     };
 
     return (

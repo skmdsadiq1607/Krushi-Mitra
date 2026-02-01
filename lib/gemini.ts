@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { DiseaseDetection } from "../types";
+import { DiseaseDetection, PestWeedIdentification } from "../types";
 import { FarmData } from '../contexts/FarmContext';
 
 let ai: GoogleGenAI;
@@ -70,7 +70,7 @@ export const detectDisease = async (base64Image: string, language: string): Prom
     contents: {
       parts: [
         { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
-        { text: `Analyze this crop image. Identify the disease, your confidence level (0-100), severity (Low, Medium, High), a simple explanation for the farmer, step-by-step treatment options, the estimated cost in local currency (INR), and preventive measures for the next season. Provide the response in ${language}. Your entire response must be a single, valid JSON object with no extra text or markdown formatting.` }
+        { text: `Analyze this crop image. Identify the disease, your confidence level (0-100), severity (Low, Medium, High), a simple explanation for the farmer, step-by-step treatment options, the estimated cost in local currency (INR), and preventive measures. Crucially, suggest 2-3 specific, commonly available pesticide or fungicide products in India (including chemical composition and popular brand names if possible) for treatment. Provide the response in ${language}. Your entire response must be a single, valid JSON object with no extra text or markdown formatting.` }
       ]
     },
     config: {
@@ -84,9 +84,20 @@ export const detectDisease = async (base64Image: string, language: string): Prom
           explanation: { type: Type.STRING },
           treatmentSteps: { type: Type.ARRAY, items: { type: Type.STRING } },
           estimatedCostINR: { type: Type.NUMBER },
-          preventiveMeasures: { type: Type.ARRAY, items: { type: Type.STRING } }
+          preventiveMeasures: { type: Type.ARRAY, items: { type: Type.STRING } },
+          suggestedProducts: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    name: { type: Type.STRING },
+                    composition: { type: Type.STRING }
+                },
+                required: ['name', 'composition']
+            }
+          }
         },
-        required: ['diseaseName', 'confidence', 'severity', 'explanation', 'treatmentSteps', 'estimatedCostINR', 'preventiveMeasures']
+        required: ['diseaseName', 'confidence', 'severity', 'explanation', 'treatmentSteps', 'estimatedCostINR', 'preventiveMeasures', 'suggestedProducts']
       }
     }
   });
@@ -98,6 +109,71 @@ export const detectDisease = async (base64Image: string, language: string): Prom
     nextSteps: parsedResponse.treatmentSteps || [],
   };
 };
+
+export const identifyPestOrWeed = async (base64Image: string, language: string, analysisType: 'Pest' | 'Weed'): Promise<PestWeedIdentification> => {
+  const genAI = getAI();
+  const typeLower = analysisType.toLowerCase();
+  
+  const prompt = `Analyze this image to identify the ${typeLower}.
+    Provide a detailed analysis in ${language}. Your response must be a single, valid JSON object with the following structure:
+    1. 'name': The scientific or common name of the ${typeLower}.
+    2. 'type': The string "${analysisType}".
+    3. 'confidence': Your confidence level (0-100) in the identification.
+    4. 'threatLevel': The threat level to common Indian crops. For pests, use 'Low', 'Medium', 'High', or 'Beneficial'. For weeds, use 'Low', 'Medium', or 'High'.
+    5. 'description': A brief description of the ${typeLower} and the damage or impact it causes.
+    6. 'controlMethods': An array of objects, each with 'type' (e.g., 'Chemical', 'Organic', 'Mechanical') and a 'description' of the method.
+    7. 'suggestedProducts': An array of 2-3 specific, commonly available ${typeLower === 'pest' ? 'pesticide' : 'herbicide'} products in India, including 'name' and 'composition' (e.g., brand name and chemical).
+    Ensure the entire output is only the JSON object, without any extra text or markdown formatting.`;
+
+  const response = await genAI.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: {
+        parts: [
+            { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
+            { text: prompt }
+        ]
+    },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          name: { type: Type.STRING },
+          type: { type: Type.STRING, enum: ['Pest', 'Weed'] },
+          confidence: { type: Type.NUMBER },
+          threatLevel: { type: Type.STRING, enum: ['Low', 'Medium', 'High', 'Beneficial'] },
+          description: { type: Type.STRING },
+          controlMethods: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                type: { type: Type.STRING, enum: ['Chemical', 'Organic', 'Biological', 'Mechanical'] },
+                description: { type: Type.STRING }
+              },
+              required: ['type', 'description']
+            }
+          },
+          suggestedProducts: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                composition: { type: Type.STRING }
+              },
+              required: ['name', 'composition']
+            }
+          }
+        },
+        required: ['name', 'type', 'confidence', 'threatLevel', 'description', 'controlMethods', 'suggestedProducts']
+      }
+    }
+  });
+
+  return parseGeminiResponse<PestWeedIdentification>(response.text);
+};
+
 
 export interface MarketAnalysis {
     analysisText: string;
@@ -125,7 +201,8 @@ export const getMarketAnalysis = async (
     location: string, 
     language: string,
     localPrice: number,
-    storageCostPerWeek: number,
+    totalStorageCost: number,
+    season: string,
     spoilageRatePerWeek: number,
     harvestedQuantity: number
 ): Promise<MarketAnalysis> => {
@@ -135,17 +212,17 @@ export const getMarketAnalysis = async (
         The farmer's current situation:
         - Current local price: ₹${localPrice} per quintal
         - Harvested quantity: ${harvestedQuantity} quintals
-        - Weekly storage cost: ₹${storageCostPerWeek}
+        - Total storage cost for the entire ${season} season: ₹${totalStorageCost}
         - Weekly spoilage rate: ${spoilageRatePerWeek}%
 
-        Provide a single, valid JSON object in ${language} with:
+        First, intelligently estimate the weekly storage cost based on the total seasonal cost and the typical length of the ${season} season in India. Then, provide a single, valid JSON object in ${language} with:
         1. 'analysisText': A brief summary of market conditions.
-        2. 'priceTrend': An array of the last 4 weeks' prices (simulated date and price).
+        2. 'priceTrend': An array of the last 4 weeks' prices (find real historical data if possible, otherwise simulate a realistic trend).
         3. 'recommendation': A final, clear recommendation text.
         4. 'sellVsStore': An object containing:
             a. 'decision': A short string like "Sell Now" or "Store for 2 Weeks".
-            b. 'sellNowProfit': The total profit if sold now.
-            c. 'storeProfitProjections': An array with profit projections for storing for 1, 2, and 4 weeks. Each object should have 'weeks' and 'profit'.
+            b. 'sellNowProfit': The total profit if sold now (Revenue - Total Investment is not needed, just show Revenue).
+            c. 'storeProfitProjections': An array with profit projections for storing for 1, 2, and 4 weeks. Each object should have 'weeks' and 'profit'. These profit projections should account for your calculated weekly storage cost and spoilage.
         
         Ensure your entire output is only the JSON object, adhering to the schema. Use Google Search for the most current data.
     `;
@@ -217,7 +294,11 @@ export interface StrategicAdvice {
         }[];
     };
     cropSwitch: {
-        currentCropProfit: number;
+        currentCrop: {
+            profit: number;
+            waterRequirement: 'Low' | 'Moderate' | 'High';
+            riskLevel: 'Low' | 'Moderate' | 'High';
+        };
         suggestions: {
             cropName: string;
             estimatedProfit: number;
@@ -237,7 +318,6 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
         (farmData.costs.machinery?.fuel || 0) +
         (farmData.costs.electricity || 0) +
         (farmData.costs.irrigation || 0) +
-        (farmData.costs.transport || 0) +
         (farmData.costs.storage || 0);
     
     const context = `
@@ -251,8 +331,10 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
       
       Based on this, provide a detailed, professional-grade strategic analysis in ${language}.
       1.  **Debt Pressure:** Calculate a score (0-100) based on investment vs. typical revenue for these crops. Classify level as Low (0-40), Moderate (41-70), or High (71-100). Provide a brief, insightful summary.
-      2.  **Rain Failure Risk:** Assess the risk level (Low, Moderate, High) based on water source and crops. Suggest a primary strategy and then list 3 detailed, actionable strategies with titles, descriptions, pros, and cons. Be specific, e.g., 'Install 5HP drip system' not just 'Use drip irrigation'.
-      3.  **Crop Switch Opportunity:** Calculate the estimated profit for the current main crop (${farmData.farmDetails.crops[0]}). Then, suggest 2 alternative crops suitable for the conditions. For each, provide estimated profit, water requirement (Low, Moderate, High), risk level (Low, Moderate, High), and a well-reasoned explanation referencing specific market trends or soil suitability.
+      2.  **Rain Failure Risk:** Assess the risk level (Low, Moderate, High) based on water source and crops. Suggest a primary strategy and then list 3 detailed, actionable strategies with titles, descriptions, pros, and cons.
+      3.  **Crop Switch Opportunity:** 
+          a. First, analyze the farmer's **current main crop (${farmData.farmDetails.crops[0]})**. Calculate its estimated profit, water requirement (Low, Moderate, High), and risk level (Low, Moderate, High).
+          b. Then, suggest 2 alternative crops suitable for the conditions. For each, provide estimated profit, water requirement, risk level, and a well-reasoned explanation referencing market trends or soil suitability.
       
       Your entire response must be a single, valid JSON object adhering to the provided schema, with no additional text or formatting.
     `;
@@ -298,7 +380,15 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
                     cropSwitch: {
                         type: Type.OBJECT,
                         properties: {
-                            currentCropProfit: { type: Type.NUMBER },
+                            currentCrop: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    profit: { type: Type.NUMBER },
+                                    waterRequirement: { type: Type.STRING, enum: ['Low', 'Moderate', 'High'] },
+                                    riskLevel: { type: Type.STRING, enum: ['Low', 'Moderate', 'High'] },
+                                },
+                                required: ['profit', 'waterRequirement', 'riskLevel']
+                            },
                             suggestions: {
                                 type: Type.ARRAY,
                                 items: {
@@ -314,7 +404,7 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
                                 }
                             }
                         },
-                        required: ['currentCropProfit', 'suggestions']
+                        required: ['currentCrop', 'suggestions']
                     }
                 },
                 required: ['debtPressure', 'rainFailure', 'cropSwitch']
@@ -322,7 +412,14 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
         }
     });
 
-    return parseGeminiResponse<StrategicAdvice>(response.text);
+    // For backward compatibility with old property name in the component
+    const parsed = parseGeminiResponse<any>(response.text);
+    if (parsed.cropSwitch && parsed.cropSwitch.currentCrop) {
+        parsed.cropSwitch.currentCropProfit = parsed.cropSwitch.currentCrop.profit;
+    }
+
+
+    return parsed as StrategicAdvice;
 };
 
 export interface WeatherData {
@@ -444,4 +541,82 @@ export const reverseGeocode = async (lat: number, lon: number): Promise<string> 
       throw new Error("Failed to reverse geocode coordinates.");
   }
   return text.trim();
+};
+
+export interface GovernmentSchemesInfo {
+    centralSchemes: { name: string; description: string; link: string }[];
+    stateSchemes: { name: string; description: string; link: string }[];
+    msp: { crop: string; price: number; details: string };
+    farmerRights: { name: string; description: string }[];
+}
+
+export const getGovernmentSchemes = async (location: string, crop: string, language: string): Promise<GovernmentSchemesInfo> => {
+    const genAI = getAI();
+    const response = await genAI.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Using Google Search, find relevant information for a farmer in ${location}, India, who grows ${crop}. Provide a concise summary in ${language}. Your response must be a single, valid JSON object with the following structure:
+        1. 'centralSchemes': An array of the top 3-4 central government schemes for farmers (include name, a brief description, and a 'link' to an official source).
+        2. 'stateSchemes': An array of the top 2-3 state-specific schemes for farmers in ${location} (include name, description, and 'link').
+        3. 'msp': An object with the latest announced Minimum Support Price for ${crop}. Include 'crop' name, 'price' in INR per quintal, and a 'details' string about the recent announcement.
+        4. 'farmerRights': An array of 2-3 key farmer rights in India (e.g., Right to Soil Health Card), with a 'name' and a brief 'description' for each.
+        Ensure all information is up-to-date and links are valid.
+        `,
+        config: {
+            tools: [{ googleSearch: {} }],
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    centralSchemes: {
+                        type: Type.ARRAY,
+                        items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, link: { type: Type.STRING } }, required: ['name', 'description', 'link'] }
+                    },
+                    stateSchemes: {
+                        type: Type.ARRAY,
+                        items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, link: { type: Type.STRING } }, required: ['name', 'description', 'link'] }
+                    },
+                    msp: {
+                        type: Type.OBJECT,
+                        properties: { crop: { type: Type.STRING }, price: { type: Type.NUMBER }, details: { type: Type.STRING } },
+                        required: ['crop', 'price', 'details']
+                    },
+                    farmerRights: {
+                        type: Type.ARRAY,
+                        items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['name', 'description'] }
+                    }
+                },
+                required: ['centralSchemes', 'stateSchemes', 'msp', 'farmerRights']
+            }
+        }
+    });
+
+    return parseGeminiResponse<GovernmentSchemesInfo>(response.text);
+};
+
+
+export interface MarketPriceSuggestion {
+    price: number;
+    justification: string;
+}
+
+export const getMarketPriceSuggestion = async (crop: string, location: string, language: string): Promise<MarketPriceSuggestion> => {
+    const genAI = getAI();
+    const response = await genAI.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Using Google Search, find the current approximate market price (mandi price) in INR per quintal for ${crop} in the ${location} region of India. Provide your answer as a single, valid JSON object in ${language} with two keys: 'price' (a single number) and 'justification' (a brief text explaining the source or reason for this price, e.g., "Based on recent mandi prices in...").`,
+        config: {
+            tools: [{ googleSearch: {} }],
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    price: { type: Type.NUMBER },
+                    justification: { type: Type.STRING }
+                },
+                required: ['price', 'justification']
+            }
+        }
+    });
+
+    return parseGeminiResponse<MarketPriceSuggestion>(response.text);
 };
