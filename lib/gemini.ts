@@ -3,9 +3,24 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { DiseaseDetection } from "../types";
 import { FarmData } from '../contexts/FarmContext';
 
-// Initialize the Gemini AI model client.
-// It's crucial that the API_KEY is set in the environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let ai: GoogleGenAI;
+
+/**
+ * Lazily initializes and returns a singleton instance of the GoogleGenAI client.
+ * Throws a specific error if the API key is not configured.
+ * @returns The initialized GoogleGenAI instance.
+ */
+function getAI(): GoogleGenAI {
+    if (!process.env.API_KEY) {
+        // This specific error message will be caught by UI error boundaries.
+        throw new Error("Gemini API key is not configured. Please set the API_KEY environment variable in your deployment settings.");
+    }
+    if (!ai) {
+        ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    }
+    return ai;
+}
+
 
 /**
  * A robust parser for cleaning and parsing Gemini's JSON responses.
@@ -49,7 +64,8 @@ const parseGeminiResponse = <T>(responseText: string | undefined): T => {
  * @returns A promise that resolves to a DiseaseDetection object.
  */
 export const detectDisease = async (base64Image: string, language: string): Promise<DiseaseDetection> => {
-  const response = await ai.models.generateContent({
+  const genAI = getAI();
+  const response = await genAI.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: {
       parts: [
@@ -113,6 +129,7 @@ export const getMarketAnalysis = async (
     spoilageRatePerWeek: number,
     harvestedQuantity: number
 ): Promise<MarketAnalysis> => {
+    const genAI = getAI();
     const context = `
         Analyze the market for ${crop} in ${location}. 
         The farmer's current situation:
@@ -133,7 +150,7 @@ export const getMarketAnalysis = async (
         Ensure your entire output is only the JSON object, adhering to the schema. Use Google Search for the most current data.
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await genAI.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: context,
         config: {
@@ -212,6 +229,7 @@ export interface StrategicAdvice {
 }
 
 export const getStrategicAdvice = async (farmData: FarmData, language: string): Promise<StrategicAdvice> => {
+    const genAI = getAI();
     const totalInvestment = (farmData.costs.seeds?.cost || 0) +
         (farmData.costs.fertilizers?.reduce((s, i) => s + i.cost, 0) || 0) +
         (farmData.costs.pesticides?.reduce((s, i) => s + i.cost, 0) || 0) +
@@ -239,7 +257,7 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
       Your entire response must be a single, valid JSON object adhering to the provided schema, with no additional text or formatting.
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await genAI.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: context,
         config: {
@@ -325,7 +343,8 @@ export interface WeatherData {
 }
 
 export const getWeatherAnalysis = async (location: string, language: string): Promise<WeatherData> => {
-    const response = await ai.models.generateContent({
+    const genAI = getAI();
+    const response = await genAI.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `Get the current weather and a 7-day forecast for ${location}. Provide a single, valid JSON object with: 1) 'current' conditions (temp, feels_like, humidity, wind_speed, description). 2) a 'forecast' array for 7 days (day name, temp_max, temp_min, description). 3) an 'advisory' string with an actionable farming tip based on the forecast. Respond in ${language}. Ensure your entire output is only the JSON object.`,
         config: {
@@ -375,6 +394,7 @@ export interface WaterAdvice {
 }
 
 export const getWaterManagementAdvice = async (farmData: FarmData, language: string): Promise<WaterAdvice> => {
+    const genAI = getAI();
     const context = `
       Based on this farm data, provide water management advice.
       - Location: ${farmData.farmDetails.location}
@@ -385,7 +405,7 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
       
       Provide a single, valid JSON object with: 1) 'weeklyUsage' (estimated total liters). 2) 'nextIrrigation' (a string like 'In 2 days' or 'Tomorrow'). 3) a 'tip' (a specific, actionable irrigation recommendation). Respond in ${language}. The entire response must be only the JSON object.
     `;
-    const response = await ai.models.generateContent({
+    const response = await genAI.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: context,
         config: {
@@ -413,7 +433,8 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
  * @returns A promise that resolves to a "District, State" string.
  */
 export const reverseGeocode = async (lat: number, lon: number): Promise<string> => {
-  const response = await ai.models.generateContent({
+  const genAI = getAI();
+  const response = await genAI.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Based on the coordinates latitude: ${lat} and longitude: ${lon}, provide the approximate District and State. Your response should be a single string in the format "District, State". Do not add any other text or explanation.`,
   });
