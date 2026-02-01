@@ -8,6 +8,7 @@ import { AIProvider } from './contexts/AIContext';
 
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
 import FarmSetup from './modules/FarmSetup';
 import Dashboard from './modules/Dashboard';
 import CostManager from './modules/CostManager';
@@ -62,6 +63,7 @@ const Main: React.FC = () => {
               <Route path="/notebook" element={<FarmNotebook />} />
             </Routes>
           </div>
+          <Footer />
         </main>
       </div>
     </HashRouter>
