@@ -1,0 +1,9 @@
+{
+  "name": "Krushi Mitra - Next-Gen Farmer Operating System",
+  "description": "An enterprise-grade digital command center for modern agriculture. Real-time vision scouting, multimodal AI diagnosis, and strategic crop planning.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
