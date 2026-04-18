@@ -93,46 +93,24 @@ const parseGeminiResponse = <T>(responseText: string | undefined, defaultValues?
  * @param language The language for the response (e.g., 'en', 'te', 'hi', 'ur').
  * @returns A promise that resolves to a DiseaseDetection object.
  */
-export const detectDisease = async (base64Image: string, language: string): Promise<DiseaseDetection> => {
+export const detectDisease = async (base64Image: string, language: string, mimeType: string = 'image/jpeg'): Promise<DiseaseDetection> => {
   const genAI = getAI();
   const response = await genAI.models.generateContent({
     model: 'gemini-2.5-pro',
-    contents: {
-      parts: [
-        { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
-        { text: `Analyze this crop image through an elite scientific lens. Utilize deep past historical data of agricultural diseases. Identify the disease, your confidence level (0-100), severity (Low, Medium, High), a simple scientific explanation for the farmer, highly accurate step-by-step treatment options, the estimated cost in local currency (INR), and verified preventive measures. Crucially, suggest 2-3 specific, scientifically-proven pesticide or fungicide products in India (including chemical composition and popular brand names) for treatment. Provide the response in ${language}. Your entire response must be a single, valid JSON object with no extra text or markdown formatting.` }
-      ]
-    },
-    config: {
-      //  
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          diseaseName: { type: Type.STRING },
-          confidence: { type: Type.NUMBER },
-          severity: { type: Type.STRING, enum: ['Low', 'Medium', 'High'] },
-          explanation: { type: Type.STRING },
-          treatmentSteps: { type: Type.ARRAY, items: { type: Type.STRING } },
-          estimatedCostINR: { type: Type.NUMBER },
-          preventiveMeasures: { type: Type.ARRAY, items: { type: Type.STRING } },
-          suggestedProducts: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    name: { type: Type.STRING },
-                    composition: { type: Type.STRING }
-                },
-                required: ['name', 'composition']
-            }
-          }
-        },
-        required: ['diseaseName', 'confidence', 'severity', 'explanation', 'treatmentSteps', 'estimatedCostINR', 'preventiveMeasures', 'suggestedProducts']
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          { inlineData: { data: base64Image, mimeType: mimeType } },
+          { text: `Analyze this crop image through an elite scientific lens. Utilize deep past historical data of agricultural diseases. Identify the disease, your confidence level (0-100), severity (Low, Medium, High), a simple scientific explanation for the farmer, highly accurate step-by-step treatment options, the estimated cost in local currency (INR), and verified preventive measures. Crucially, suggest 2-3 specific, scientifically-proven pesticide or fungicide products in India (including chemical composition and popular brand names) for treatment. Provide the response in ${language}. Your entire response must be a single, valid JSON object with no extra text or markdown formatting.` }
+        ]
       }
+    ],
+    config: {
+      responseMimeType: "application/json",
     }
   });
-  
+
   const parsedResponse = parseGeminiResponse<any>(response.text, {
     diseaseName: "Unknown",
     confidence: 0,
@@ -150,7 +128,7 @@ export const detectDisease = async (base64Image: string, language: string): Prom
   };
 };
 
-export const identifyPestOrWeed = async (base64Image: string, language: string, analysisType: 'Pest' | 'Weed'): Promise<PestWeedIdentification> => {
+export const identifyPestOrWeed = async (base64Image: string, language: string, analysisType: 'Pest' | 'Weed', mimeType: string = 'image/jpeg'): Promise<PestWeedIdentification> => {
   const genAI = getAI();
   const typeLower = analysisType.toLowerCase();
   
@@ -168,48 +146,17 @@ export const identifyPestOrWeed = async (base64Image: string, language: string, 
 
   const response = await genAI.models.generateContent({
     model: 'gemini-2.5-pro',
-    contents: {
+    contents: [
+      {
+        role: 'user',
         parts: [
-            { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
+            { inlineData: { data: base64Image, mimeType: mimeType } },
             { text: prompt }
         ]
-    },
-    config: {
-       
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          name: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ['Pest', 'Weed'] },
-          confidence: { type: Type.NUMBER },
-          threatLevel: { type: Type.STRING, enum: ['Low', 'Medium', 'High', 'Beneficial'] },
-          description: { type: Type.STRING },
-          controlMethods: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                type: { type: Type.STRING, enum: ['Chemical', 'Organic', 'Biological', 'Mechanical'] },
-                description: { type: Type.STRING }
-              },
-              required: ['type', 'description']
-            }
-          },
-          suggestedProducts: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING },
-                composition: { type: Type.STRING }
-              },
-              required: ['name', 'composition']
-            }
-          }
-        },
-        required: ['name', 'type', 'confidence', 'threatLevel', 'description', 'controlMethods', 'suggestedProducts']
       }
+    ],
+    config: {
+      responseMimeType: "application/json",
     }
   });
 

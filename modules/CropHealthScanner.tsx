@@ -21,6 +21,7 @@ const CropHealthScanner: React.FC = () => {
   const [analysisType, setAnalysisType] = useState<AnalysisType>('Disease');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [base64Image, setBase64Image] = useState<string | null>(null);
+  const [mimeType, setMimeType] = useState<string>('image/jpeg');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -33,6 +34,7 @@ const CropHealthScanner: React.FC = () => {
         const base64String = (reader.result as string).split(',')[1];
         setImagePreview(reader.result as string);
         setBase64Image(base64String);
+        setMimeType(file.type);
         setResult(null);
         setError(null);
       };
@@ -57,14 +59,14 @@ const CropHealthScanner: React.FC = () => {
     try {
         let detectionResult: AnalysisResult;
         if (analysisType === 'Disease') {
-            detectionResult = await detectDisease(base64Image, language);
+            detectionResult = await detectDisease(base64Image, language, mimeType);
         } else {
-            detectionResult = await identifyPestOrWeed(base64Image, language, analysisType);
+            detectionResult = await identifyPestOrWeed(base64Image, language, analysisType, mimeType);
         }
         setResult(detectionResult);
         speak('speakAnalysisComplete');
-    } catch (err) {
-      setError(t('cropHealthScannerError'));
+    } catch (err: any) {
+      setError(t('cropHealthScannerError') + ' ' + (err?.message || ''));
       console.error(err);
     } finally {
       setIsLoading(false);
