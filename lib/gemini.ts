@@ -229,44 +229,6 @@ export const getMarketAnalysis = async (
          
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-                analysisText: { type: Type.STRING },
-                priceTrend: { 
-                    type: Type.ARRAY, 
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            date: { type: Type.STRING },
-                            price: { type: Type.NUMBER }
-                        },
-                        required: ['date', 'price']
-                    }
-                },
-                recommendation: { type: Type.STRING },
-                sellVsStore: {
-                    type: Type.OBJECT,
-                    properties: {
-                        decision: { type: Type.STRING },
-                        sellNowProfit: { type: Type.NUMBER },
-                        storeProfitProjections: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    weeks: { type: Type.NUMBER },
-                                    profit: { type: Type.NUMBER }
-                                },
-                                required: ['weeks', 'profit']
-                            }
-                        }
-                    },
-                    required: ['decision', 'sellNowProfit', 'storeProfitProjections']
-                }
-            },
-            required: ['analysisText', 'priceTrend', 'recommendation', 'sellVsStore']
-        }
     };
 
     try {
@@ -365,71 +327,6 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
         config: {
              
             responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    debtPressure: {
-                        type: Type.OBJECT,
-                        properties: {
-                            score: { type: Type.NUMBER },
-                            level: { type: Type.STRING, enum: ['Low', 'Moderate', 'High'] },
-                            summary: { type: Type.STRING }
-                        },
-                        required: ['score', 'level', 'summary']
-                    },
-                    rainFailure: {
-                        type: Type.OBJECT,
-                        properties: {
-                            riskLevel: { type: Type.STRING, enum: ['Low', 'Moderate', 'High'] },
-                            primaryStrategy: { type: Type.STRING },
-                            strategies: {
-                                type: Type.ARRAY,
-                                items: {
-                                    type: Type.OBJECT,
-                                    properties: {
-                                        title: { type: Type.STRING },
-                                        description: { type: Type.STRING },
-                                        pros: { type: Type.ARRAY, items: { type: Type.STRING } },
-                                        cons: { type: Type.ARRAY, items: { type: Type.STRING } }
-                                    },
-                                    required: ['title', 'description', 'pros', 'cons']
-                                }
-                            }
-                        },
-                        required: ['riskLevel', 'primaryStrategy', 'strategies']
-                    },
-                    cropSwitch: {
-                        type: Type.OBJECT,
-                        properties: {
-                            currentCrop: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    profit: { type: Type.NUMBER },
-                                    waterRequirement: { type: Type.STRING, enum: ['Low', 'Moderate', 'High'] },
-                                    riskLevel: { type: Type.STRING, enum: ['Low', 'Moderate', 'High'] },
-                                },
-                                required: ['profit', 'waterRequirement', 'riskLevel']
-                            },
-                            suggestions: {
-                                type: Type.ARRAY,
-                                items: {
-                                    type: Type.OBJECT,
-                                    properties: {
-                                        cropName: { type: Type.STRING },
-                                        estimatedProfit: { type: Type.NUMBER },
-                                        waterRequirement: { type: Type.STRING, enum: ['Low', 'Moderate', 'High'] },
-                                        riskLevel: { type: Type.STRING, enum: ['Low', 'Moderate', 'High'] },
-                                        reason: { type: Type.STRING }
-                                    },
-                                    required: ['cropName', 'estimatedProfit', 'waterRequirement', 'riskLevel', 'reason']
-                                }
-                            }
-                        },
-                        required: ['currentCrop', 'suggestions']
-                    }
-                },
-                required: ['debtPressure', 'rainFailure', 'cropSwitch']
-            }
         }
     });
 
@@ -470,37 +367,6 @@ export const getWeatherAnalysis = async (location: string, language: string): Pr
          
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-                current: {
-                    type: Type.OBJECT,
-                    properties: {
-                        temp: { type: Type.NUMBER },
-                        feels_like: { type: Type.NUMBER },
-                        humidity: { type: Type.NUMBER },
-                        wind_speed: { type: Type.NUMBER },
-                        description: { type: Type.STRING },
-                    },
-                    required: ['temp', 'feels_like', 'humidity', 'wind_speed', 'description']
-                },
-                forecast: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            day: { type: Type.STRING },
-                            temp_max: { type: Type.NUMBER },
-                            temp_min: { type: Type.NUMBER },
-                            description: { type: Type.STRING },
-                        },
-                         required: ['day', 'temp_max', 'temp_min', 'description']
-                    }
-                },
-                advisory: { type: Type.STRING }
-            },
-            required: ['current', 'forecast', 'advisory']
-        }
     };
 
     try {
@@ -551,15 +417,6 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
          
         tools: [{ googleSearch: {} }], // Use search to factor in recent weather
         responseMimeType: "application/json",
-        responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-                weeklyUsage: { type: Type.NUMBER },
-                nextIrrigation: { type: Type.STRING },
-                tip: { type: Type.STRING },
-            },
-            required: ['weeklyUsage', 'nextIrrigation', 'tip']
-        }
     };
 
     try {
@@ -627,29 +484,6 @@ export const getGovernmentSchemes = async (location: string, crop: string, langu
          
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-                centralSchemes: {
-                    type: Type.ARRAY,
-                    items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, link: { type: Type.STRING } }, required: ['name', 'description', 'link'] }
-                },
-                stateSchemes: {
-                    type: Type.ARRAY,
-                    items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, link: { type: Type.STRING } }, required: ['name', 'description', 'link'] }
-                },
-                msp: {
-                    type: Type.OBJECT,
-                    properties: { crop: { type: Type.STRING }, price: { type: Type.NUMBER }, details: { type: Type.STRING } },
-                    required: ['crop', 'price', 'details']
-                },
-                farmerRights: {
-                    type: Type.ARRAY,
-                    items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['name', 'description'] }
-                }
-            },
-            required: ['centralSchemes', 'stateSchemes', 'msp', 'farmerRights']
-        }
     };
 
     try {
@@ -695,14 +529,6 @@ export const getMarketPriceSuggestion = async (crop: string, location: string, l
              
             tools: [{ googleSearch: {} }],
             responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    price: { type: Type.NUMBER },
-                    justification: { type: Type.STRING }
-                },
-                required: ['price', 'justification']
-            }
         }
     });
 
