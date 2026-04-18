@@ -96,7 +96,7 @@ const parseGeminiResponse = <T>(responseText: string | undefined, defaultValues?
 export const detectDisease = async (base64Image: string, language: string): Promise<DiseaseDetection> => {
   const genAI = getAI();
   const response = await genAI.models.generateContent({
-    model: 'gemini-3.1-pro-preview',
+    model: 'gemini-2.5-pro',
     contents: {
       parts: [
         { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
@@ -104,7 +104,7 @@ export const detectDisease = async (base64Image: string, language: string): Prom
       ]
     },
     config: {
-      thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+      //  
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -167,7 +167,7 @@ export const identifyPestOrWeed = async (base64Image: string, language: string, 
     Ensure the entire output is only the JSON object, without any extra text or markdown formatting.`;
 
   const response = await genAI.models.generateContent({
-    model: 'gemini-3.1-pro-preview',
+    model: 'gemini-2.5-pro',
     contents: {
         parts: [
             { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
@@ -175,7 +175,7 @@ export const identifyPestOrWeed = async (base64Image: string, language: string, 
         ]
     },
     config: {
-      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+       
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -279,7 +279,7 @@ export const getMarketAnalysis = async (
     `;
 
     const config = {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+         
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
@@ -324,7 +324,7 @@ export const getMarketAnalysis = async (
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-2.5-pro',
             contents: context,
             config
         });
@@ -337,7 +337,7 @@ export const getMarketAnalysis = async (
     } catch (error) {
         console.warn("Market analysis with search failed, retrying without search...", error);
         const response = await genAI.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-2.5-pro',
             contents: context + " (Note: If you cannot find real-time data, rely on profound scientific and historical knowledge to estimate the accurate market patterns)",
             config: { ...config, tools: [] }
         });
@@ -413,10 +413,10 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
     `;
 
     const response = await genAI.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-2.5-pro',
         contents: context,
         config: {
-            thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+             
             responseMimeType: "application/json",
             responseSchema: {
                 type: Type.OBJECT,
@@ -520,7 +520,7 @@ export interface WeatherData {
 export const getWeatherAnalysis = async (location: string, language: string): Promise<WeatherData> => {
     const genAI = getAI();
     const config = {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+         
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
@@ -558,7 +558,7 @@ export const getWeatherAnalysis = async (location: string, language: string): Pr
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-2.5-flash',
             contents: `Get the current weather and a 7-day forecast for ${location}. Provide a single, valid JSON object with: 1) 'current' conditions (temp, feels_like, humidity, wind_speed, description). 2) a 'forecast' array for 7 days (day name, temp_max, temp_min, description). 3) an 'advisory' string with an actionable farming tip based on the forecast. Respond in ${language}. Ensure your entire output is only the JSON object.`,
             config
         });
@@ -570,7 +570,7 @@ export const getWeatherAnalysis = async (location: string, language: string): Pr
     } catch (error) {
         console.warn("Weather analysis with search failed, retrying without search...", error);
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-2.5-flash',
             contents: `Estimate the current weather and a 7-day forecast for ${location} based on typical seasonal patterns. Provide a single, valid JSON object with: 1) 'current' conditions (temp, feels_like, humidity, wind_speed, description). 2) a 'forecast' array for 7 days (day name, temp_max, temp_min, description). 3) an 'advisory' string with an actionable farming tip. Respond in ${language}. Ensure your entire output is only the JSON object.`,
             config: { ...config, tools: [] }
         });
@@ -601,7 +601,7 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
       Provide a single, valid JSON object with: 1) 'weeklyUsage' (highly accurate estimated total liters based on crop biology). 2) 'nextIrrigation' (a scientifically reasoned string like 'In 2 days' or 'Tomorrow'). 3) a 'tip' (a specific, actionable, meteorologically sound irrigation recommendation). Respond in ${language}. The entire response must be only the JSON object.
     `;
     const config = {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+         
         tools: [{ googleSearch: {} }], // Use search to factor in recent weather
         responseMimeType: "application/json",
         responseSchema: {
@@ -617,7 +617,7 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-2.5-pro',
             contents: context,
             config
         });
@@ -627,7 +627,7 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
     } catch (error) {
         console.warn("Water management advice with search failed, retrying without search...", error);
         const response = await genAI.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-2.5-pro',
             contents: context,
             config: { ...config, tools: [] }
         });
@@ -646,10 +646,10 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
 export const reverseGeocode = async (lat: number, lon: number): Promise<string> => {
   const genAI = getAI();
   const response = await genAI.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-2.5-flash',
     contents: `Based on the coordinates latitude: ${lat} and longitude: ${lon}, provide the approximate District and State. Your response should be a single string in the format "District, State". Do not add any other text or explanation.`,
     config: {
-      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+       
     }
   });
   
@@ -677,7 +677,7 @@ export const getGovernmentSchemes = async (location: string, crop: string, langu
         Ensure all information is exceptionally up-to-date and absolute factual accuracy is maintained.
         `;
     const config = {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+         
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
@@ -707,7 +707,7 @@ export const getGovernmentSchemes = async (location: string, crop: string, langu
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-2.5-pro',
             contents: prompt,
             config
         });
@@ -720,7 +720,7 @@ export const getGovernmentSchemes = async (location: string, crop: string, langu
     } catch (error) {
         console.warn("Government schemes with search failed, retrying without search...", error);
         const response = await genAI.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-2.5-pro',
             contents: prompt + " (Note: If you cannot find real-time data, utilize profound historical knowledge to extrapolate highly accurate general well-known schemes and MSP estimates.)",
             config: { ...config, tools: [] }
         });
@@ -742,10 +742,10 @@ export interface MarketPriceSuggestion {
 export const getMarketPriceSuggestion = async (crop: string, location: string, language: string): Promise<MarketPriceSuggestion> => {
     const genAI = getAI();
     const response = await genAI.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash',
         contents: `Using Google Search, find the current approximate market price (mandi price) in INR per quintal for ${crop} in the ${location} region of India. Provide your answer as a single, valid JSON object in ${language} with two keys: 'price' (a single number) and 'justification' (a brief text explaining the source or reason for this price, e.g., "Based on recent mandi prices in...").`,
         config: {
-            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+             
             tools: [{ googleSearch: {} }],
             responseMimeType: "application/json",
             responseSchema: {
@@ -783,10 +783,10 @@ export const getDailyBriefing = async (farmData: FarmData, language: string): Pr
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-2.5-pro',
             contents: context,
             config: {
-                thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+                 
             }
         });
         return response.text || "Good morning! Your farm is looking good today. Stay focused on your irrigation schedule.";
@@ -818,10 +818,10 @@ export const handleVoiceQuery = async (query: string, farmData: FarmData, langua
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-2.5-flash',
             contents: context,
             config: {
-                thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                 
                 tools: [{ googleSearch: {} }]
             }
         });
@@ -830,10 +830,10 @@ export const handleVoiceQuery = async (query: string, farmData: FarmData, langua
         console.warn("Voice query with search failed, retrying without search...", error);
         try {
             const response = await genAI.models.generateContent({
-                model: 'gemini-3-flash-preview',
+                model: 'gemini-2.5-flash',
                 contents: context,
                 config: {
-                    thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                     
                     tools: []
                 }
             });
