@@ -8,13 +8,15 @@ import {
     getWeatherAnalysis, 
     WeatherData, 
     getWaterManagementAdvice, 
-    WaterAdvice 
+    WaterAdvice,
+    getDailyBriefing
 } from '../lib/gemini';
 
 interface AIContextState {
     strategicAdvice: StrategicAdvice | null;
     weatherData: WeatherData | null;
     waterAdvice: WaterAdvice | null;
+    dailyBriefing: string | null;
     isLoading: boolean;
     error: string | null;
 }
@@ -30,6 +32,7 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
         strategicAdvice: null,
         weatherData: null,
         waterAdvice: null,
+        dailyBriefing: null,
         isLoading: true,
         error: null,
     });
@@ -52,7 +55,7 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
         const currentLanguage = languageRef.current;
 
         if (!currentFarmData || !currentFarmData.farmDetails.location) {
-            setState(s => ({ ...s, isLoading: false, strategicAdvice: null, weatherData: null, waterAdvice: null }));
+            setState(s => ({ ...s, isLoading: false, strategicAdvice: null, weatherData: null, waterAdvice: null, dailyBriefing: null }));
             return;
         }
 
@@ -62,17 +65,20 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
             const advicePromise = getStrategicAdvice(currentFarmData, currentLanguage);
             const weatherPromise = getWeatherAnalysis(currentFarmData.farmDetails.location, currentLanguage);
             const waterPromise = getWaterManagementAdvice(currentFarmData, currentLanguage);
+            const dailyBriefingPromise = getDailyBriefing(currentFarmData, currentLanguage);
 
-            const [adviceResult, weatherResult, waterResult] = await Promise.allSettled([
+            const [adviceResult, weatherResult, waterResult, briefingResult] = await Promise.allSettled([
                 advicePromise,
                 weatherPromise,
-                waterPromise
+                waterPromise,
+                dailyBriefingPromise
             ]);
 
             setState({
                 strategicAdvice: adviceResult.status === 'fulfilled' ? adviceResult.value : null,
                 weatherData: weatherResult.status === 'fulfilled' ? weatherResult.value : null,
                 waterAdvice: waterResult.status === 'fulfilled' ? waterResult.value : null,
+                dailyBriefing: briefingResult.status === 'fulfilled' ? briefingResult.value : null,
                 isLoading: false,
                 error: (adviceResult.status === 'rejected' && weatherResult.status === 'rejected' && waterResult.status === 'rejected') 
                     ? "Failed to load AI insights. Please try again." 
@@ -83,6 +89,7 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
             if (adviceResult.status === 'rejected') console.error("Strategic Advice failed:", adviceResult.reason);
             if (weatherResult.status === 'rejected') console.error("Weather Analysis failed:", weatherResult.reason);
             if (waterResult.status === 'rejected') console.error("Water Advice failed:", waterResult.reason);
+            if (briefingResult.status === 'rejected') console.error("Daily Briefing failed:", briefingResult.reason);
 
         } catch (error) {
             console.error("Failed to fetch AI data", error);

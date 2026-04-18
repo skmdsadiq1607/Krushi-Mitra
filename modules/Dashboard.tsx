@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
     const { farmData } = useFarm();
     const { t } = useLocalization();
     useAutoSpeak('speakDashboardIntro');
-    const { strategicAdvice: advice, isLoading, error, refresh } = useAI();
+    const { strategicAdvice: advice, dailyBriefing, isLoading, error, refresh } = useAI();
 
     const kpis = useMemo(() => {
         if (!farmData) return { totalInvestment: 0, costPerAcre: 0, cropCount: 0, landSize: 0 };
@@ -93,17 +93,25 @@ const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-12 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-stone-900 tracking-tight">
-                        {greeting}, {farmData?.farmDetails.farmerName || 'Farmer'}!
-                    </h1>
-                    <p className="text-[#5A5A40] font-serif italic text-lg mt-1">{t('dashboardSubtitle')}</p>
-                </div>
-                <div className="flex items-center gap-2 bg-white/50 p-2 rounded-2xl border border-stone-200/50">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-xs font-bold text-stone-500 uppercase tracking-widest">{t('headerStatusText')}</span>
-                </div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-[#166534] to-[#064e3b] rounded-[3rem] p-10 md:p-14 text-white shadow-xl border border-green-800">
+                 <div className="absolute top-0 right-0 w-72 h-72 bg-[#ea580c] opacity-30 rounded-full blur-[80px] -mr-32 -mt-32" />
+                 <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FF9933] opacity-20 rounded-full blur-[80px] -ml-32 -mb-32" />
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[url('https://www.transparenttextures.com/patterns/mandala.png')] opacity-[0.05] pointer-events-none mix-blend-overlay"></div>
+                 
+                 <div className="relative z-10 flex flex-col justify-between gap-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full self-start border border-orange-200/20 shadow-[0_0_15px_rgba(234,88,12,0.3)]">
+                        <Sparkles className="w-4 h-4 text-[#FF9933]" />
+                        <span className="text-white/95 text-xs font-bold uppercase tracking-widest">{t('headerStatusText')}</span>
+                    </div>
+                    <div>
+                        <h1 className="text-5xl md:text-6xl font-serif font-bold text-white tracking-tight mb-4 leading-tight drop-shadow-sm">
+                            {greeting},<br/><span className="text-[#FF9933]">{farmData?.farmDetails.farmerName || 'Farmer'}</span> <span className="inline-block transform origin-bottom-left hover:rotate-12 transition-transform">🙏</span>
+                        </h1>
+                        <p className="text-orange-50 font-serif italic text-xl md:text-2xl leading-relaxed max-w-4xl drop-shadow-sm border-l-4 border-[#FF9933] pl-4 py-1 bg-gradient-to-r from-orange-500/10 to-transparent">
+                            {dailyBriefing || "Your digital farming companion is ready. Let's make today productive."}
+                        </p>
+                    </div>
+                 </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

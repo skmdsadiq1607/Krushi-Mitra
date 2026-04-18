@@ -96,15 +96,15 @@ const parseGeminiResponse = <T>(responseText: string | undefined, defaultValues?
 export const detectDisease = async (base64Image: string, language: string): Promise<DiseaseDetection> => {
   const genAI = getAI();
   const response = await genAI.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3.1-pro-preview',
     contents: {
       parts: [
         { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
-        { text: `Analyze this crop image. Identify the disease, your confidence level (0-100), severity (Low, Medium, High), a simple explanation for the farmer, step-by-step treatment options, the estimated cost in local currency (INR), and preventive measures. Crucially, suggest 2-3 specific, commonly available pesticide or fungicide products in India (including chemical composition and popular brand names if possible) for treatment. Provide the response in ${language}. Your entire response must be a single, valid JSON object with no extra text or markdown formatting.` }
+        { text: `Analyze this crop image through an elite scientific lens. Utilize deep past historical data of agricultural diseases. Identify the disease, your confidence level (0-100), severity (Low, Medium, High), a simple scientific explanation for the farmer, highly accurate step-by-step treatment options, the estimated cost in local currency (INR), and verified preventive measures. Crucially, suggest 2-3 specific, scientifically-proven pesticide or fungicide products in India (including chemical composition and popular brand names) for treatment. Provide the response in ${language}. Your entire response must be a single, valid JSON object with no extra text or markdown formatting.` }
       ]
     },
     config: {
-      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+      thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -155,18 +155,19 @@ export const identifyPestOrWeed = async (base64Image: string, language: string, 
   const typeLower = analysisType.toLowerCase();
   
   const prompt = `Analyze this image to identify the ${typeLower}.
-    Provide a detailed analysis in ${language}. Your response must be a single, valid JSON object with the following structure:
-    1. 'name': The scientific or common name of the ${typeLower}.
+    Act as an elite agricultural scientist and perform high-level, end-to-end research. Use science and past history of the region's common threats to provide profoundly accurate results in ${language}. 
+    Your response must be a single, valid JSON object with the following structure:
+    1. 'name': The scientific or exact common name of the ${typeLower}.
     2. 'type': The string "${analysisType}".
     3. 'confidence': Your confidence level (0-100) in the identification.
     4. 'threatLevel': The threat level to common Indian crops. For pests, use 'Low', 'Medium', 'High', or 'Beneficial'. For weeds, use 'Low', 'Medium', or 'High'.
-    5. 'description': A brief description of the ${typeLower} and the damage or impact it causes.
-    6. 'controlMethods': An array of objects, each with 'type' (e.g., 'Chemical', 'Organic', 'Mechanical') and a 'description' of the method.
-    7. 'suggestedProducts': An array of 2-3 specific, commonly available ${typeLower === 'pest' ? 'pesticide' : 'herbicide'} products in India, including 'name' and 'composition' (e.g., brand name and chemical).
+    5. 'description': A brief description of the ${typeLower} and the scientific damage or impact it causes.
+    6. 'controlMethods': An array of objects, each with 'type' (e.g., 'Chemical', 'Organic', 'Mechanical') and a precise, scientifically-backed 'description' of the method.
+    7. 'suggestedProducts': An array of 2-3 specific, commonly available and effective ${typeLower === 'pest' ? 'pesticide' : 'herbicide'} products in India, including 'name' and 'composition' (e.g., brand name and chemical).
     Ensure the entire output is only the JSON object, without any extra text or markdown formatting.`;
 
   const response = await genAI.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3.1-pro-preview',
     contents: {
         parts: [
             { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
@@ -257,27 +258,28 @@ export const getMarketAnalysis = async (
 ): Promise<MarketAnalysis> => {
     const genAI = getAI();
     const context = `
-        Analyze the market for ${crop} in ${location}. 
+        Perform an accurate, high-level end-to-end scientific research analysis of the market for ${crop} in ${location}. 
+        Use past history and deep agricultural economics to provide highly precise and actionable insights.
         The farmer's current situation:
         - Current local price: ₹${localPrice} per quintal
         - Harvested quantity: ${harvestedQuantity} quintals
         - Total storage cost for the entire ${season} season: ₹${totalStorageCost}
         - Weekly spoilage rate: ${spoilageRatePerWeek}%
 
-        First, intelligently estimate the weekly storage cost based on the total seasonal cost and the typical length of the ${season} season in India. Then, provide a single, valid JSON object in ${language} with:
-        1. 'analysisText': A brief summary of market conditions.
-        2. 'priceTrend': An array of the last 4 weeks' prices (find real historical data if possible, otherwise simulate a realistic trend).
-        3. 'recommendation': A final, clear recommendation text.
+        First, intelligently estimate the weekly storage cost based on the total seasonal cost, past inflation data, and the typical length of the ${season} season in India. Then, provide a single, valid JSON object in ${language} with:
+        1. 'analysisText': A brief, deep-dive scientific and historical summary of market conditions for this crop in this specific location.
+        2. 'priceTrend': An array of the last 4 weeks' prices (find absolute real historical data and scientific correlations if possible, otherwise simulate a profoundly realistic trend).
+        3. 'recommendation': A final, robust agricultural economics-backed recommendation text.
         4. 'sellVsStore': An object containing:
             a. 'decision': A short string like "Sell Now" or "Store for 2 Weeks".
             b. 'sellNowProfit': The total profit if sold now (Revenue - Total Investment is not needed, just show Revenue).
-            c. 'storeProfitProjections': An array with profit projections for storing for 1, 2, and 4 weeks. Each object should have 'weeks' and 'profit'. These profit projections should account for your calculated weekly storage cost and spoilage.
+            c. 'storeProfitProjections': An array with precise profit projections for storing for 1, 2, and 4 weeks. Each object should have 'weeks' and 'profit'. These profit projections must accurately account for your calculated weekly storage cost and scientific spoilage rate.
         
-        Ensure your entire output is only the JSON object, adhering to the schema. Use Google Search for the most current data.
+        Ensure your entire output is only the JSON object, adhering to the schema. Use Google Search to ensure the highest degree of accuracy possible.
     `;
 
     const config = {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
@@ -322,7 +324,7 @@ export const getMarketAnalysis = async (
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-pro-preview',
             contents: context,
             config
         });
@@ -335,8 +337,8 @@ export const getMarketAnalysis = async (
     } catch (error) {
         console.warn("Market analysis with search failed, retrying without search...", error);
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: context + " (Note: If you cannot find real-time data, provide realistic estimates based on your training data)",
+            model: 'gemini-3.1-pro-preview',
+            contents: context + " (Note: If you cannot find real-time data, rely on profound scientific and historical knowledge to estimate the accurate market patterns)",
             config: { ...config, tools: [] }
         });
         return parseGeminiResponse<MarketAnalysis>(response.text, {
@@ -392,7 +394,7 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
         (farmData.costs.storage || 0);
     
     const context = `
-      Analyze the following farm data for a farmer in ${farmData.farmDetails.location}.
+      Act as an elite agricultural expert and conduct a high-level, end-to-end scientific analysis of the following farm data for a farmer in ${farmData.farmDetails.location}. Utilize profound past history, soil science, and agro-economics to formulate the most accurate strategy possible.
       - Land Size: ${farmData.farmDetails.landSize} acres
       - Soil: ${farmData.farmDetails.soilType}
       - Crops: ${farmData.farmDetails.crops.join(', ')}
@@ -400,21 +402,21 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
       - Water Source: ${farmData.farmDetails.waterSource}
       - Total Investment (INR): ${totalInvestment}
       
-      Based on this, provide a detailed, professional-grade strategic analysis in ${language}.
-      1.  **Debt Pressure:** Calculate a score (0-100) based on investment vs. typical revenue for these crops. Classify level as Low (0-40), Moderate (41-70), or High (71-100). Provide a brief, insightful summary.
-      2.  **Rain Failure Risk:** Assess the risk level (Low, Moderate, High) based on water source and crops. Suggest a primary strategy and then list 3 detailed, actionable strategies with titles, descriptions, pros, and cons.
+      Based on this deep scientific assessment, provide a detailed, professional-grade strategic analysis in ${language}.
+      1.  **Debt Pressure:** Calculate an accurate score (0-100) based on investment vs. historically accurate average revenue for these exact crops in ${farmData.farmDetails.location}. Classify level as Low (0-40), Moderate (41-70), or High (71-100). Provide a brief, insightful, scientifically-backed summary.
+      2.  **Rain Failure Risk:** Accurately assess the meteorological risk level (Low, Moderate, High) based on climate history for this region regarding the water source/crops. Suggest a primary mitigation strategy and then list 3 detailed, actionable, highly scientific strategies with titles, descriptions, pros, and cons.
       3.  **Crop Switch Opportunity:** 
-          a. First, analyze the farmer's **current main crop (${farmData.farmDetails.crops[0]})**. Calculate its estimated profit, water requirement (Low, Moderate, High), and risk level (Low, Moderate, High).
-          b. Then, suggest 2 alternative crops suitable for the conditions. For each, provide estimated profit, water requirement, risk level, and a well-reasoned explanation referencing market trends or soil suitability.
+          a. First, analyze the farmer's **current main crop (${farmData.farmDetails.crops[0]})** using agricultural economics and biological needs. Calculate its estimated profit, water requirement (Low, Moderate, High), and science-based risk level (Low, Moderate, High).
+          b. Then, suggest 2 alternative crops scientifically proven to thrive in ${farmData.farmDetails.soilType} soil during the ${farmData.farmDetails.season} season in ${farmData.farmDetails.location}. For each, provide estimated profit, water requirement, risk level, and a well-reasoned explanation referencing verifiable market trends and agronomy.
       
       Your entire response must be a single, valid JSON object adhering to the provided schema, with no additional text or formatting.
     `;
 
     const response = await genAI.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.1-pro-preview',
         contents: context,
         config: {
-            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+            thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
             responseMimeType: "application/json",
             responseSchema: {
                 type: Type.OBJECT,
@@ -589,17 +591,17 @@ export interface WaterAdvice {
 export const getWaterManagementAdvice = async (farmData: FarmData, language: string): Promise<WaterAdvice> => {
     const genAI = getAI();
     const context = `
-      Based on this farm data, provide water management advice.
+      Perform high-level, end-to-end scientific research to provide profound water management advice based on this farm data. Use historical evapotranspiration rates and soil hydrology.
       - Location: ${farmData.farmDetails.location}
       - Crop: ${farmData.farmDetails.crops[0]}
       - Soil Type: ${farmData.farmDetails.soilType}
       - Water Source: ${farmData.farmDetails.waterSource}
       - Land Size: ${farmData.farmDetails.landSize} acres
       
-      Provide a single, valid JSON object with: 1) 'weeklyUsage' (estimated total liters). 2) 'nextIrrigation' (a string like 'In 2 days' or 'Tomorrow'). 3) a 'tip' (a specific, actionable irrigation recommendation). Respond in ${language}. The entire response must be only the JSON object.
+      Provide a single, valid JSON object with: 1) 'weeklyUsage' (highly accurate estimated total liters based on crop biology). 2) 'nextIrrigation' (a scientifically reasoned string like 'In 2 days' or 'Tomorrow'). 3) a 'tip' (a specific, actionable, meteorologically sound irrigation recommendation). Respond in ${language}. The entire response must be only the JSON object.
     `;
     const config = {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
         tools: [{ googleSearch: {} }], // Use search to factor in recent weather
         responseMimeType: "application/json",
         responseSchema: {
@@ -615,7 +617,7 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-pro-preview',
             contents: context,
             config
         });
@@ -625,7 +627,7 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
     } catch (error) {
         console.warn("Water management advice with search failed, retrying without search...", error);
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-pro-preview',
             contents: context,
             config: { ...config, tools: [] }
         });
@@ -667,15 +669,15 @@ export interface GovernmentSchemesInfo {
 
 export const getGovernmentSchemes = async (location: string, crop: string, language: string): Promise<GovernmentSchemesInfo> => {
     const genAI = getAI();
-    const prompt = `Using Google Search, find relevant information for a farmer in ${location}, India, who grows ${crop}. Provide a concise summary in ${language}. Your response must be a single, valid JSON object with the following structure:
-        1. 'centralSchemes': An array of the top 3-4 central government schemes for farmers (include name, a brief description, and a 'link' to an official source).
-        2. 'stateSchemes': An array of the top 2-3 state-specific schemes for farmers in ${location} (include name, description, and 'link').
-        3. 'msp': An object with the latest announced Minimum Support Price for ${crop}. Include 'crop' name, 'price' in INR per quintal, and a 'details' string about the recent announcement.
-        4. 'farmerRights': An array of 2-3 key farmer rights in India (e.g., Right to Soil Health Card), with a 'name' and a brief 'description' for each.
-        Ensure all information is up-to-date and links are valid.
+    const prompt = `Using Google Search, conduct high-level end-to-end research to find profoundly accurate, historically up-to-date relevant information for a farmer in ${location}, India, who grows ${crop}. Validate against scientific and governmental truth. Provide a precise summary in ${language}. Your response must be a single, valid JSON object with the following structure:
+        1. 'centralSchemes': An array of the absolutely top 3-4 central government schemes for farmers (include precise name, an accurate brief description leveraging historical context, and a 'link' to an official source).
+        2. 'stateSchemes': An array of the top 2-3 most accurate state-specific schemes for farmers in ${location} (include name, deep description, and 'link').
+        3. 'msp': An object with the exact, latest announced Minimum Support Price for ${crop}. Include 'crop' name, 'price' in INR per quintal, and a 'details' string about the recent scientific or historical announcement context.
+        4. 'farmerRights': An array of 2-3 key scientific or legal farmer rights in India (e.g., Right to Soil Health Card), with a 'name' and a highly accurate brief 'description' for each.
+        Ensure all information is exceptionally up-to-date and absolute factual accuracy is maintained.
         `;
     const config = {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
@@ -705,7 +707,7 @@ export const getGovernmentSchemes = async (location: string, crop: string, langu
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-pro-preview',
             contents: prompt,
             config
         });
@@ -718,8 +720,8 @@ export const getGovernmentSchemes = async (location: string, crop: string, langu
     } catch (error) {
         console.warn("Government schemes with search failed, retrying without search...", error);
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: prompt + " (Note: If you cannot find real-time data, provide general well-known schemes and MSP estimates based on your training data)",
+            model: 'gemini-3.1-pro-preview',
+            contents: prompt + " (Note: If you cannot find real-time data, utilize profound historical knowledge to extrapolate highly accurate general well-known schemes and MSP estimates.)",
             config: { ...config, tools: [] }
         });
         return parseGeminiResponse<GovernmentSchemesInfo>(response.text, {
@@ -771,20 +773,20 @@ export const getMarketPriceSuggestion = async (crop: string, location: string, l
 export const getDailyBriefing = async (farmData: FarmData, language: string): Promise<string> => {
     const genAI = getAI();
     const context = `
-      Generate a concise, encouraging daily briefing for a farmer in ${farmData.farmDetails.location}.
+      Act as an elite agricultural scientist and formulate a highly accurate, brief daily briefing for a farmer in ${farmData.farmDetails.location}. Utilize past history and data-driven insights.
       - Farmer Name: ${farmData.farmDetails.farmerName}
       - Crops: ${farmData.farmDetails.crops.join(', ')}
       - Season: ${farmData.farmDetails.season}
       
-      The briefing should be 2-3 sentences long, mentioning one positive thing (like a good weather forecast or market trend) and one quick tip for the day. Use a warm, professional tone in ${language}.
+      The briefing should be 2-3 sentences long, mentioning one precise scientific or historically-backed actionable insight (like a climatic trend or agronomic tip) relevant to their current crops and location. Use an encouraging, professional tone in ${language}.
     `;
 
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-pro-preview',
             contents: context,
             config: {
-                thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
             }
         });
         return response.text || "Good morning! Your farm is looking good today. Stay focused on your irrigation schedule.";

@@ -155,7 +155,29 @@ const FarmSetup: React.FC = () => {
     saveFarmSetup(processedDetails);
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, steps.length));
+  const nextStep = () => {
+    // Validation logic before moving to next step
+    if (currentStep === 1 && !details.farmerName.trim()) {
+        alert("Please enter your name.");
+        return;
+    }
+    if (currentStep === 2 && !details.location.trim()) {
+        alert("Please enter your location or use GPS to proceed.");
+        return;
+    }
+    if (currentStep === 3) {
+        if (!details.landSize || isNaN(parseFloat(details.landSize))) {
+             alert("Please enter a valid land size.");
+             return;
+        }
+        if (!details.crops.trim()) {
+             alert("Please enter at least one crop.");
+             return;
+        }
+    }
+    setCurrentStep(prev => Math.min(prev + 1, steps.length));
+  };
+  
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
   
   return (
