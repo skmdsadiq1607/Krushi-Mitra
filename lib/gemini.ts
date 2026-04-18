@@ -11,7 +11,12 @@ let ai: GoogleGenAI;
  * @returns The initialized GoogleGenAI instance.
  */
 function getAI(): GoogleGenAI {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    // Attempt standard process.env, Vite's import.meta.env, and their VITE_ prefixes
+    const apiKey = process.env.GEMINI_API_KEY || 
+                   process.env.API_KEY || 
+                   (import.meta as any).env?.VITE_GEMINI_API_KEY || 
+                   (import.meta as any).env?.GEMINI_API_KEY;
+
     if (!apiKey) {
         // This specific error message will be caught by UI error boundaries.
         throw new Error("Gemini API key is not configured. Please set the GEMINI_API_KEY environment variable in your deployment settings.");
