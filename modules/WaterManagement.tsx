@@ -58,11 +58,11 @@ const WaterManagement: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card className="bg-gradient-to-br from-blue-50 to-sky-100">
                     <p className="text-sm font-bold text-blue-800">{t('waterWeeklyUsage')}</p>
-                    <p className="text-4xl font-black text-blue-700 mt-2">{(advice.weeklyUsage / 1000).toLocaleString()} <span className="text-2xl">m³</span></p>
+                    <p className="text-4xl font-black text-blue-700 mt-2">{((advice.weeklyUsage || 0) / 1000).toLocaleString()} <span className="text-2xl">m³</span></p>
                 </Card>
                  <Card className="bg-gradient-to-br from-teal-50 to-emerald-100">
                     <p className="text-sm font-bold text-teal-800">{t('waterNextIrrigation')}</p>
-                    <p className="text-4xl font-black text-teal-700 mt-2">{advice.nextIrrigation}</p>
+                    <p className="text-4xl font-black text-teal-700 mt-2">{advice.nextIrrigation || 'Unknown'}</p>
                 </Card>
             </div>
 

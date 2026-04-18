@@ -81,36 +81,36 @@ const GovernmentSchemes: React.FC = () => {
                     <div className="space-y-8">
                         <Card title={t('centralSchemesTitle')} icon={<Landmark />}>
                             <div className="space-y-4">
-                                {schemesInfo.centralSchemes.map((scheme, index) => (
+                                {schemesInfo.centralSchemes?.length > 0 ? schemesInfo.centralSchemes.map((scheme, index) => (
                                     <SchemeCard key={`central-${index}`} scheme={scheme} t={t} />
-                                ))}
+                                )) : <p className="text-stone-500 italic">No information available at this time.</p>}
                             </div>
                         </Card>
                          <Card title={t('stateSchemesTitle')} icon={<Building />}>
                             <div className="space-y-4">
-                                {schemesInfo.stateSchemes.map((scheme, index) => (
+                                {schemesInfo.stateSchemes?.length > 0 ? schemesInfo.stateSchemes.map((scheme, index) => (
                                     <SchemeCard key={`state-${index}`} scheme={scheme} t={t} />
-                                ))}
+                                )) : <p className="text-stone-500 italic">No information available at this time.</p>}
                             </div>
                         </Card>
                     </div>
                      <div className="space-y-8">
                         <Card title={t('mspTitle')} icon={<IndianRupee />}>
                             <div className="text-center bg-emerald-50 p-6 rounded-2xl border border-emerald-200">
-                                <p className="text-lg font-bold text-emerald-800">{schemesInfo.msp.crop}</p>
-                                <p className="text-5xl font-black text-emerald-600 my-2">₹{schemesInfo.msp.price.toLocaleString()}</p>
+                                <p className="text-lg font-bold text-emerald-800">{schemesInfo.msp?.crop || 'Crop'}</p>
+                                <p className="text-5xl font-black text-emerald-600 my-2">₹{(schemesInfo.msp?.price || 0).toLocaleString()}</p>
                                 <p className="text-sm text-emerald-700">per Quintal</p>
                             </div>
-                            <p className="text-xs text-stone-500 mt-4">{schemesInfo.msp.details}</p>
+                            <p className="text-xs text-stone-500 mt-4">{schemesInfo.msp?.details}</p>
                         </Card>
                         <Card title={t('farmerRightsTitle')} icon={<ShieldCheck />}>
                              <ul className="space-y-3">
-                                {schemesInfo.farmerRights.map((right, index) => (
+                                {schemesInfo.farmerRights?.length > 0 ? schemesInfo.farmerRights.map((right, index) => (
                                     <li key={`right-${index}`}>
                                         <p className="font-bold text-stone-800">{right.name}</p>
                                         <p className="text-sm text-stone-600">{right.description}</p>
                                     </li>
-                                ))}
+                                )) : <p className="text-stone-500 italic">No information available at this time.</p>}
                             </ul>
                         </Card>
                     </div>

@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { DiseaseDetection, PestWeedIdentification } from "../types";
 import { FarmData } from '../contexts/FarmContext';
 
@@ -11,12 +11,13 @@ let ai: GoogleGenAI;
  * @returns The initialized GoogleGenAI instance.
  */
 function getAI(): GoogleGenAI {
-    if (!process.env.API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
         // This specific error message will be caught by UI error boundaries.
-        throw new Error("Gemini API key is not configured. Please set the API_KEY environment variable in your deployment settings.");
+        throw new Error("Gemini API key is not configured. Please set the GEMINI_API_KEY environment variable in your deployment settings.");
     }
     if (!ai) {
-        ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        ai = new GoogleGenAI({ apiKey });
     }
     return ai;
 }
@@ -29,31 +30,60 @@ function getAI(): GoogleGenAI {
  * @returns A parsed JSON object of type T.
  * @throws An error if the response is empty or cannot be parsed.
  */
-const parseGeminiResponse = <T>(responseText: string | undefined): T => {
+const parseGeminiResponse = <T>(responseText: string | undefined, defaultValues?: Partial<T>): T => {
     if (!responseText) {
         throw new Error("Received empty response from API.");
     }
     
-    // Clean the string: remove markdown backticks and trim whitespace
-    let cleanedText = responseText.trim();
-    if (cleanedText.startsWith('```json')) {
-        cleanedText = cleanedText.substring(7); // Remove ```json
-        if (cleanedText.endsWith('```')) {
-            cleanedText = cleanedText.slice(0, -3); // Remove ```
-        }
+    let text = responseText.trim();
+    
+    // Try to extract JSON from markdown block
+    const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (match) {
+        text = match[1].trim();
     }
-    cleanedText = cleanedText.trim();
 
+    let parsed: any;
     try {
-        return JSON.parse(cleanedText) as T;
+        parsed = JSON.parse(text);
     } catch (error) {
-        console.error("Failed to parse JSON:", cleanedText);
-        // Re-throw a more informative error for debugging
-        if (error instanceof Error) {
-            throw new Error(`JSON Parse Error: ${error.message}. Original text: ${cleanedText.substring(0, 150)}...`);
+        console.error("Failed to parse JSON, falling back to brace extraction. Erring text:", text.substring(0, 50));
+        
+        // Final fallback: try to find the outermost braces/brackets
+        const firstBrace = responseText.indexOf('{');
+        const lastBrace = responseText.lastIndexOf('}');
+        const firstBracket = responseText.indexOf('[');
+        const lastBracket = responseText.lastIndexOf(']');
+        
+        // Determine whether the outer structure is likely an object or an array
+        const start = Math.min(
+            firstBrace !== -1 ? firstBrace : Infinity,
+            firstBracket !== -1 ? firstBracket : Infinity
+        );
+        const end = Math.max(lastBrace, lastBracket);
+
+        if (start !== Infinity && end !== -1 && end >= start) {
+            try {
+                parsed = JSON.parse(responseText.substring(start, end + 1));
+            } catch (err) {
+                 if (error instanceof Error) {
+                     throw new Error(`JSON Parse Error: ${error.message}. Original text: ${text.substring(0, 150)}...`);
+                 }
+                 throw new Error("An unknown JSON parsing error occurred.");
+            }
+        } else {
+             if (error instanceof Error) {
+                 throw new Error(`JSON Parse Error: ${error.message}. Original text: ${text.substring(0, 150)}...`);
+             }
+             throw new Error("An unknown JSON parsing error occurred.");
         }
-        throw new Error("An unknown JSON parsing error occurred.");
     }
+
+    // Assign safe defaults if provided
+    if (defaultValues && typeof parsed === 'object' && parsed !== null) {
+        return { ...defaultValues, ...parsed } as T;
+    }
+    return parsed as T;
 };
 
 
@@ -74,6 +104,7 @@ export const detectDisease = async (base64Image: string, language: string): Prom
       ]
     },
     config: {
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -102,7 +133,16 @@ export const detectDisease = async (base64Image: string, language: string): Prom
     }
   });
   
-  const parsedResponse = parseGeminiResponse<any>(response.text);
+  const parsedResponse = parseGeminiResponse<any>(response.text, {
+    diseaseName: "Unknown",
+    confidence: 0,
+    severity: "Low",
+    explanation: "Could not analyze image.",
+    treatmentSteps: [],
+    estimatedCostINR: 0,
+    preventiveMeasures: [],
+    suggestedProducts: []
+  });
   // Ensure compatibility with the type definition
   return {
     ...parsedResponse,
@@ -134,6 +174,7 @@ export const identifyPestOrWeed = async (base64Image: string, language: string, 
         ]
     },
     config: {
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -171,7 +212,15 @@ export const identifyPestOrWeed = async (base64Image: string, language: string, 
     }
   });
 
-  return parseGeminiResponse<PestWeedIdentification>(response.text);
+  return parseGeminiResponse<PestWeedIdentification>(response.text, {
+            name: "Unknown",
+            type: analysisType,
+            confidence: 0,
+            threatLevel: "Low",
+            description: "Could not identify.",
+            controlMethods: [],
+            suggestedProducts: []
+        });
 };
 
 
@@ -227,54 +276,76 @@ export const getMarketAnalysis = async (
         Ensure your entire output is only the JSON object, adhering to the schema. Use Google Search for the most current data.
     `;
 
-    const response = await genAI.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: context,
-        config: {
-            tools: [{ googleSearch: {} }],
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    analysisText: { type: Type.STRING },
-                    priceTrend: { 
-                        type: Type.ARRAY, 
-                        items: {
-                            type: Type.OBJECT,
-                            properties: {
-                                date: { type: Type.STRING },
-                                price: { type: Type.NUMBER }
-                            },
-                            required: ['date', 'price']
-                        }
-                    },
-                    recommendation: { type: Type.STRING },
-                    sellVsStore: {
+    const config = {
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
+        responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+                analysisText: { type: Type.STRING },
+                priceTrend: { 
+                    type: Type.ARRAY, 
+                    items: {
                         type: Type.OBJECT,
                         properties: {
-                            decision: { type: Type.STRING },
-                            sellNowProfit: { type: Type.NUMBER },
-                            storeProfitProjections: {
-                                type: Type.ARRAY,
-                                items: {
-                                    type: Type.OBJECT,
-                                    properties: {
-                                        weeks: { type: Type.NUMBER },
-                                        profit: { type: Type.NUMBER }
-                                    },
-                                    required: ['weeks', 'profit']
-                                }
-                            }
+                            date: { type: Type.STRING },
+                            price: { type: Type.NUMBER }
                         },
-                        required: ['decision', 'sellNowProfit', 'storeProfitProjections']
+                        required: ['date', 'price']
                     }
                 },
-                required: ['analysisText', 'priceTrend', 'recommendation', 'sellVsStore']
-            }
+                recommendation: { type: Type.STRING },
+                sellVsStore: {
+                    type: Type.OBJECT,
+                    properties: {
+                        decision: { type: Type.STRING },
+                        sellNowProfit: { type: Type.NUMBER },
+                        storeProfitProjections: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    weeks: { type: Type.NUMBER },
+                                    profit: { type: Type.NUMBER }
+                                },
+                                required: ['weeks', 'profit']
+                            }
+                        }
+                    },
+                    required: ['decision', 'sellNowProfit', 'storeProfitProjections']
+                }
+            },
+            required: ['analysisText', 'priceTrend', 'recommendation', 'sellVsStore']
         }
-    });
+    };
 
-    return parseGeminiResponse<MarketAnalysis>(response.text);
+    try {
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: context,
+            config
+        });
+        return parseGeminiResponse<MarketAnalysis>(response.text, {
+                analysisText: "Market analysis unavailable.",
+                priceTrend: [],
+                recommendation: "Could not analyze market data.",
+                sellVsStore: { decision: "Unknown", sellNowProfit: 0, storeProfitProjections: [] }
+            });
+    } catch (error) {
+        console.warn("Market analysis with search failed, retrying without search...", error);
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: context + " (Note: If you cannot find real-time data, provide realistic estimates based on your training data)",
+            config: { ...config, tools: [] }
+        });
+        return parseGeminiResponse<MarketAnalysis>(response.text, {
+                analysisText: "Market analysis unavailable.",
+                priceTrend: [],
+                recommendation: "Could not analyze market data.",
+                sellVsStore: { decision: "Unknown", sellNowProfit: 0, storeProfitProjections: [] }
+        });
+    }
 };
 
 export interface StrategicAdvice {
@@ -343,6 +414,7 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
         model: 'gemini-3-flash-preview',
         contents: context,
         config: {
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
             responseMimeType: "application/json",
             responseSchema: {
                 type: Type.OBJECT,
@@ -413,7 +485,11 @@ export const getStrategicAdvice = async (farmData: FarmData, language: string): 
     });
 
     // For backward compatibility with old property name in the component
-    const parsed = parseGeminiResponse<any>(response.text);
+    const parsed = parseGeminiResponse<any>(response.text, {
+        debtPressure: { score: 0, level: 'Low', summary: "Data unavailable." },
+        rainFailure: { riskLevel: 'Low', primaryStrategy: "N/A", strategies: [] },
+        cropSwitch: { currentCrop: { profit: 0, waterRequirement: 'Low', riskLevel: 'Low' }, suggestions: [] }
+    });
     if (parsed.cropSwitch && parsed.cropSwitch.currentCrop) {
         parsed.cropSwitch.currentCropProfit = parsed.cropSwitch.currentCrop.profit;
     }
@@ -441,47 +517,67 @@ export interface WeatherData {
 
 export const getWeatherAnalysis = async (location: string, language: string): Promise<WeatherData> => {
     const genAI = getAI();
-    const response = await genAI.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Get the current weather and a 7-day forecast for ${location}. Provide a single, valid JSON object with: 1) 'current' conditions (temp, feels_like, humidity, wind_speed, description). 2) a 'forecast' array for 7 days (day name, temp_max, temp_min, description). 3) an 'advisory' string with an actionable farming tip based on the forecast. Respond in ${language}. Ensure your entire output is only the JSON object.`,
-        config: {
-            tools: [{ googleSearch: {} }],
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    current: {
+    const config = {
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
+        responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+                current: {
+                    type: Type.OBJECT,
+                    properties: {
+                        temp: { type: Type.NUMBER },
+                        feels_like: { type: Type.NUMBER },
+                        humidity: { type: Type.NUMBER },
+                        wind_speed: { type: Type.NUMBER },
+                        description: { type: Type.STRING },
+                    },
+                    required: ['temp', 'feels_like', 'humidity', 'wind_speed', 'description']
+                },
+                forecast: {
+                    type: Type.ARRAY,
+                    items: {
                         type: Type.OBJECT,
                         properties: {
-                            temp: { type: Type.NUMBER },
-                            feels_like: { type: Type.NUMBER },
-                            humidity: { type: Type.NUMBER },
-                            wind_speed: { type: Type.NUMBER },
+                            day: { type: Type.STRING },
+                            temp_max: { type: Type.NUMBER },
+                            temp_min: { type: Type.NUMBER },
                             description: { type: Type.STRING },
                         },
-                        required: ['temp', 'feels_like', 'humidity', 'wind_speed', 'description']
-                    },
-                    forecast: {
-                        type: Type.ARRAY,
-                        items: {
-                            type: Type.OBJECT,
-                            properties: {
-                                day: { type: Type.STRING },
-                                temp_max: { type: Type.NUMBER },
-                                temp_min: { type: Type.NUMBER },
-                                description: { type: Type.STRING },
-                            },
-                             required: ['day', 'temp_max', 'temp_min', 'description']
-                        }
-                    },
-                    advisory: { type: Type.STRING }
+                         required: ['day', 'temp_max', 'temp_min', 'description']
+                    }
                 },
-                required: ['current', 'forecast', 'advisory']
-            }
+                advisory: { type: Type.STRING }
+            },
+            required: ['current', 'forecast', 'advisory']
         }
-    });
+    };
 
-    return parseGeminiResponse<WeatherData>(response.text);
+    try {
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: `Get the current weather and a 7-day forecast for ${location}. Provide a single, valid JSON object with: 1) 'current' conditions (temp, feels_like, humidity, wind_speed, description). 2) a 'forecast' array for 7 days (day name, temp_max, temp_min, description). 3) an 'advisory' string with an actionable farming tip based on the forecast. Respond in ${language}. Ensure your entire output is only the JSON object.`,
+            config
+        });
+        return parseGeminiResponse<WeatherData>(response.text, {
+            current: { temp: 0, feels_like: 0, humidity: 0, wind_speed: 0, description: 'Unknown' },
+            forecast: [],
+            advisory: "Could not fetch advisory."
+        });
+    } catch (error) {
+        console.warn("Weather analysis with search failed, retrying without search...", error);
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: `Estimate the current weather and a 7-day forecast for ${location} based on typical seasonal patterns. Provide a single, valid JSON object with: 1) 'current' conditions (temp, feels_like, humidity, wind_speed, description). 2) a 'forecast' array for 7 days (day name, temp_max, temp_min, description). 3) an 'advisory' string with an actionable farming tip. Respond in ${language}. Ensure your entire output is only the JSON object.`,
+            config: { ...config, tools: [] }
+        });
+        return parseGeminiResponse<WeatherData>(response.text, {
+            current: { temp: 0, feels_like: 0, humidity: 0, wind_speed: 0, description: 'Unknown' },
+            forecast: [],
+            advisory: "Could not fetch advisory."
+        });
+    }
 };
 
 export interface WaterAdvice {
@@ -502,25 +598,41 @@ export const getWaterManagementAdvice = async (farmData: FarmData, language: str
       
       Provide a single, valid JSON object with: 1) 'weeklyUsage' (estimated total liters). 2) 'nextIrrigation' (a string like 'In 2 days' or 'Tomorrow'). 3) a 'tip' (a specific, actionable irrigation recommendation). Respond in ${language}. The entire response must be only the JSON object.
     `;
-    const response = await genAI.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: context,
-        config: {
-            tools: [{ googleSearch: {} }], // Use search to factor in recent weather
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    weeklyUsage: { type: Type.NUMBER },
-                    nextIrrigation: { type: Type.STRING },
-                    tip: { type: Type.STRING },
-                },
-                required: ['weeklyUsage', 'nextIrrigation', 'tip']
-            }
+    const config = {
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        tools: [{ googleSearch: {} }], // Use search to factor in recent weather
+        responseMimeType: "application/json",
+        responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+                weeklyUsage: { type: Type.NUMBER },
+                nextIrrigation: { type: Type.STRING },
+                tip: { type: Type.STRING },
+            },
+            required: ['weeklyUsage', 'nextIrrigation', 'tip']
         }
-    });
+    };
 
-    return parseGeminiResponse<WaterAdvice>(response.text);
+    try {
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: context,
+            config
+        });
+        return parseGeminiResponse<WaterAdvice>(response.text, {
+            weeklyUsage: 0, nextIrrigation: "Unknown", tip: "Could not fetch water advice."
+        });
+    } catch (error) {
+        console.warn("Water management advice with search failed, retrying without search...", error);
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: context,
+            config: { ...config, tools: [] }
+        });
+        return parseGeminiResponse<WaterAdvice>(response.text, {
+            weeklyUsage: 0, nextIrrigation: "Unknown", tip: "Could not fetch water advice."
+        });
+    }
 };
 
 /**
@@ -534,6 +646,9 @@ export const reverseGeocode = async (lat: number, lon: number): Promise<string> 
   const response = await genAI.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Based on the coordinates latitude: ${lat} and longitude: ${lon}, provide the approximate District and State. Your response should be a single string in the format "District, State". Do not add any other text or explanation.`,
+    config: {
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+    }
   });
   
   const text = response.text;
@@ -552,45 +667,68 @@ export interface GovernmentSchemesInfo {
 
 export const getGovernmentSchemes = async (location: string, crop: string, language: string): Promise<GovernmentSchemesInfo> => {
     const genAI = getAI();
-    const response = await genAI.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Using Google Search, find relevant information for a farmer in ${location}, India, who grows ${crop}. Provide a concise summary in ${language}. Your response must be a single, valid JSON object with the following structure:
+    const prompt = `Using Google Search, find relevant information for a farmer in ${location}, India, who grows ${crop}. Provide a concise summary in ${language}. Your response must be a single, valid JSON object with the following structure:
         1. 'centralSchemes': An array of the top 3-4 central government schemes for farmers (include name, a brief description, and a 'link' to an official source).
         2. 'stateSchemes': An array of the top 2-3 state-specific schemes for farmers in ${location} (include name, description, and 'link').
         3. 'msp': An object with the latest announced Minimum Support Price for ${crop}. Include 'crop' name, 'price' in INR per quintal, and a 'details' string about the recent announcement.
         4. 'farmerRights': An array of 2-3 key farmer rights in India (e.g., Right to Soil Health Card), with a 'name' and a brief 'description' for each.
         Ensure all information is up-to-date and links are valid.
-        `,
-        config: {
-            tools: [{ googleSearch: {} }],
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    centralSchemes: {
-                        type: Type.ARRAY,
-                        items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, link: { type: Type.STRING } }, required: ['name', 'description', 'link'] }
-                    },
-                    stateSchemes: {
-                        type: Type.ARRAY,
-                        items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, link: { type: Type.STRING } }, required: ['name', 'description', 'link'] }
-                    },
-                    msp: {
-                        type: Type.OBJECT,
-                        properties: { crop: { type: Type.STRING }, price: { type: Type.NUMBER }, details: { type: Type.STRING } },
-                        required: ['crop', 'price', 'details']
-                    },
-                    farmerRights: {
-                        type: Type.ARRAY,
-                        items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['name', 'description'] }
-                    }
+        `;
+    const config = {
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
+        responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+                centralSchemes: {
+                    type: Type.ARRAY,
+                    items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, link: { type: Type.STRING } }, required: ['name', 'description', 'link'] }
                 },
-                required: ['centralSchemes', 'stateSchemes', 'msp', 'farmerRights']
-            }
+                stateSchemes: {
+                    type: Type.ARRAY,
+                    items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING }, link: { type: Type.STRING } }, required: ['name', 'description', 'link'] }
+                },
+                msp: {
+                    type: Type.OBJECT,
+                    properties: { crop: { type: Type.STRING }, price: { type: Type.NUMBER }, details: { type: Type.STRING } },
+                    required: ['crop', 'price', 'details']
+                },
+                farmerRights: {
+                    type: Type.ARRAY,
+                    items: { type: Type.OBJECT, properties: { name: { type: Type.STRING }, description: { type: Type.STRING } }, required: ['name', 'description'] }
+                }
+            },
+            required: ['centralSchemes', 'stateSchemes', 'msp', 'farmerRights']
         }
-    });
+    };
 
-    return parseGeminiResponse<GovernmentSchemesInfo>(response.text);
+    try {
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: prompt,
+            config
+        });
+        return parseGeminiResponse<GovernmentSchemesInfo>(response.text, {
+            centralSchemes: [],
+            stateSchemes: [],
+            msp: { crop: crop, price: 0, details: "Not available" },
+            farmerRights: []
+        });
+    } catch (error) {
+        console.warn("Government schemes with search failed, retrying without search...", error);
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: prompt + " (Note: If you cannot find real-time data, provide general well-known schemes and MSP estimates based on your training data)",
+            config: { ...config, tools: [] }
+        });
+        return parseGeminiResponse<GovernmentSchemesInfo>(response.text, {
+            centralSchemes: [],
+            stateSchemes: [],
+            msp: { crop: crop, price: 0, details: "Not available" },
+            farmerRights: []
+        });
+    }
 };
 
 
@@ -605,6 +743,7 @@ export const getMarketPriceSuggestion = async (crop: string, location: string, l
         model: 'gemini-3-flash-preview',
         contents: `Using Google Search, find the current approximate market price (mandi price) in INR per quintal for ${crop} in the ${location} region of India. Provide your answer as a single, valid JSON object in ${language} with two keys: 'price' (a single number) and 'justification' (a brief text explaining the source or reason for this price, e.g., "Based on recent mandi prices in...").`,
         config: {
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
             tools: [{ googleSearch: {} }],
             responseMimeType: "application/json",
             responseSchema: {
@@ -618,5 +757,88 @@ export const getMarketPriceSuggestion = async (crop: string, location: string, l
         }
     });
 
-    return parseGeminiResponse<MarketPriceSuggestion>(response.text);
+    return parseGeminiResponse<MarketPriceSuggestion>(response.text, {
+        price: 0, justification: "Price data unavailable."
+    });
+};
+
+/**
+ * Generates a concise, encouraging daily briefing for the farmer.
+ * @param farmData The farmer's data.
+ * @param language The language for the response.
+ * @returns A promise that resolves to a string.
+ */
+export const getDailyBriefing = async (farmData: FarmData, language: string): Promise<string> => {
+    const genAI = getAI();
+    const context = `
+      Generate a concise, encouraging daily briefing for a farmer in ${farmData.farmDetails.location}.
+      - Farmer Name: ${farmData.farmDetails.farmerName}
+      - Crops: ${farmData.farmDetails.crops.join(', ')}
+      - Season: ${farmData.farmDetails.season}
+      
+      The briefing should be 2-3 sentences long, mentioning one positive thing (like a good weather forecast or market trend) and one quick tip for the day. Use a warm, professional tone in ${language}.
+    `;
+
+    try {
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: context,
+            config: {
+                thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+            }
+        });
+        return response.text || "Good morning! Your farm is looking good today. Stay focused on your irrigation schedule.";
+    } catch (error) {
+        console.error("Daily briefing failed:", error);
+        return "Good morning! Wishing you a productive day on the farm.";
+    }
+};
+
+/**
+ * Handles a voice query from the farmer and provides a spoken response.
+ * @param query The user's voice query.
+ * @param farmData The farmer's data.
+ * @param language The language for the response.
+ * @returns A promise that resolves to a string.
+ */
+export const handleVoiceQuery = async (query: string, farmData: FarmData, language: string): Promise<string> => {
+    const genAI = getAI();
+    const context = `
+      You are Krushi Mitra, an AI farming assistant. A farmer has asked you a question via voice: "${query}".
+      
+      Farmer's Context:
+      - Name: ${farmData.farmDetails.farmerName}
+      - Location: ${farmData.farmDetails.location}
+      - Crops: ${farmData.farmDetails.crops.join(', ')}
+      
+      Provide a helpful, concise answer (max 2 sentences) in ${language}. Be direct and practical. If the query is about weather, market, or general advice, use your knowledge to help.
+    `;
+
+    try {
+        const response = await genAI.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: context,
+            config: {
+                thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                tools: [{ googleSearch: {} }]
+            }
+        });
+        return response.text || "I'm sorry, I couldn't process that. How else can I help you today?";
+    } catch (error) {
+        console.warn("Voice query with search failed, retrying without search...", error);
+        try {
+            const response = await genAI.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: context,
+                config: {
+                    thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                    tools: []
+                }
+            });
+            return response.text || "I'm sorry, I couldn't process that. How else can I help you today?";
+        } catch (innerError) {
+             console.error("Voice query failed completely:", innerError);
+             return "I'm having trouble connecting right now. Please try again in a moment.";
+        }
+    }
 };

@@ -67,16 +67,16 @@ const WeatherHub: React.FC = () => {
                 <div className="lg:col-span-2">
                     <Card title={t('weatherForecast')}>
                         <div className="space-y-2">
-                            {weather.forecast.map((day, index) => (
+                            {weather.forecast?.length > 0 ? weather.forecast.map((day, index) => (
                                 <div key={index} className="grid grid-cols-4 items-center p-3 rounded-xl hover:bg-stone-50">
                                     <p className="font-bold col-span-1">{day.day}</p>
                                     <div className="col-span-1 flex justify-center">
                                         <WeatherIcon description={day.description} size={32} />
                                     </div>
                                     <p className="text-sm text-stone-500 col-span-1 truncate">{day.description}</p>
-                                    <p className="font-bold text-right col-span-1">{day.temp_max.toFixed(0)}° / {day.temp_min.toFixed(0)}°</p>
+                                    <p className="font-bold text-right col-span-1">{(day.temp_max || 0).toFixed(0)}° / {(day.temp_min || 0).toFixed(0)}°</p>
                                 </div>
-                            ))}
+                            )) : <p className="text-stone-500 italic p-4 text-center">Forecast not available.</p>}
                         </div>
                     </Card>
                 </div>

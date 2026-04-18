@@ -59,19 +59,30 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
         setState(s => ({ ...s, isLoading: true, error: null }));
 
         try {
-            const [advice, weather, water] = await Promise.all([
-                getStrategicAdvice(currentFarmData, currentLanguage),
-                getWeatherAnalysis(currentFarmData.farmDetails.location, currentLanguage),
-                getWaterManagementAdvice(currentFarmData, currentLanguage)
+            const advicePromise = getStrategicAdvice(currentFarmData, currentLanguage);
+            const weatherPromise = getWeatherAnalysis(currentFarmData.farmDetails.location, currentLanguage);
+            const waterPromise = getWaterManagementAdvice(currentFarmData, currentLanguage);
+
+            const [adviceResult, weatherResult, waterResult] = await Promise.allSettled([
+                advicePromise,
+                weatherPromise,
+                waterPromise
             ]);
-            
+
             setState({
-                strategicAdvice: advice,
-                weatherData: weather,
-                waterAdvice: water,
+                strategicAdvice: adviceResult.status === 'fulfilled' ? adviceResult.value : null,
+                weatherData: weatherResult.status === 'fulfilled' ? weatherResult.value : null,
+                waterAdvice: waterResult.status === 'fulfilled' ? waterResult.value : null,
                 isLoading: false,
-                error: null,
+                error: (adviceResult.status === 'rejected' && weatherResult.status === 'rejected' && waterResult.status === 'rejected') 
+                    ? "Failed to load AI insights. Please try again." 
+                    : null,
             });
+
+            // Log rejections for debugging
+            if (adviceResult.status === 'rejected') console.error("Strategic Advice failed:", adviceResult.reason);
+            if (weatherResult.status === 'rejected') console.error("Weather Analysis failed:", weatherResult.reason);
+            if (waterResult.status === 'rejected') console.error("Water Advice failed:", waterResult.reason);
 
         } catch (error) {
             console.error("Failed to fetch AI data", error);
@@ -83,26 +94,12 @@ export const AIProvider = ({ children }: PropsWithChildren) => {
         }
     }, []);
 
-    // Effect for the initial data load. Runs only once when farmData becomes available.
-    const isInitialLoadDone = useRef(false);
+    // Effect for data load. Runs when farmData or language changes.
     useEffect(() => {
-        if (farmData && !isInitialLoadDone.current) {
+        if (farmData && farmData.farmDetails.location) {
             fetchData();
-            isInitialLoadDone.current = true;
         }
-    }, [farmData, fetchData]);
-
-    // Effect for language changes. Skips the initial mount to avoid double-fetching.
-    const isMounted = useRef(false);
-    useEffect(() => {
-        if (isMounted.current) {
-            if (farmDataRef.current) {
-                fetchData();
-            }
-        } else {
-            isMounted.current = true;
-        }
-    }, [language, fetchData]);
+    }, [farmData?.farmDetails.location, language, fetchData]);
 
 
     const refresh = () => {

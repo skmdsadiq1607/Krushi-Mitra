@@ -89,6 +89,7 @@ export interface Translation {
     kpiCropCount: string;
     kpiLandSize: string;
     quickAccess: string;
+    commandCenter: string;
     aiInsightsTitle: string;
     debtPressureTitle: string;
     debtPressureLow: string;
@@ -397,6 +398,7 @@ export const translations: { [key: string]: Translation } = {
       kpiCropCount: 'Crops Planted',
       kpiLandSize: 'Total Land',
       quickAccess: 'Quick Access',
+      commandCenter: 'Command Center',
       aiInsightsTitle: 'AI Strategic Insights',
       debtPressureTitle: 'Debt Pressure',
       debtPressureLow: 'Low',
@@ -683,6 +685,7 @@ export const translations: { [key: string]: Translation } = {
       kpiCropCount: 'నాటిన పంటలు',
       kpiLandSize: 'మొత్తం భూమి',
       quickAccess: 'త్వరిత యాక్సెస్',
+      commandCenter: 'కమాండ్ సెంటర్',
       aiInsightsTitle: 'AI వ్యూహాత్మక అంతర్దృష్టులు',
       debtPressureTitle: 'అప్పుల ఒత్తిడి',
       debtPressureLow: 'తక్కువ',
@@ -969,6 +972,7 @@ export const translations: { [key: string]: Translation } = {
       kpiCropCount: 'लगाई गई फसलें',
       kpiLandSize: 'कुल भूमि',
       quickAccess: 'त्वरित पहुँच',
+      commandCenter: 'कमांड सेंटर',
       aiInsightsTitle: 'एआई रणनीतिक अंतर्दृष्टि',
       debtPressureTitle: 'कर्ज का दबाव',
       debtPressureLow: 'कम',
@@ -1255,6 +1259,7 @@ export const translations: { [key: string]: Translation } = {
       kpiCropCount: 'لگائی گئی فصلیں',
       kpiLandSize: 'کل زمین',
       quickAccess: 'فوری رسائی',
+      commandCenter: 'کمانڈ سینٹر',
       aiInsightsTitle: 'AI اسٹریٹجک بصیرت',
       debtPressureTitle: 'قرض کا دباؤ',
       debtPressureLow: 'کم',
